@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>実験哲学ゲームプラットフォーム</title>
+  <title>実践哲学ゲームプラットフォーム</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Noto+Sans+JP:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -28,51 +28,6 @@
       --danger:         #c46b6b;
       --radius:         10px;
       --radius-lg:      16px;
-      --grid-line:      rgba(255,255,255,0.02);
-    }
-
-    :root.light {
-      --bg:             #f5f3ef;
-      --surface:        #ffffff;
-      --surface2:       #eeece8;
-      --border:         rgba(0,0,0,0.08);
-      --border2:        rgba(0,0,0,0.14);
-      --text:           #1a1917;
-      --muted:          #8a8680;
-      --accent:         #9a7a3e;
-      --accent-bg:      rgba(154,122,62,0.10);
-      --accent-border:  rgba(154,122,62,0.30);
-      --info:           #3a6fad;
-      --info-bg:        rgba(58,111,173,0.08);
-      --info-border:    rgba(58,111,173,0.25);
-      --success:        #3a8a66;
-      --danger:         #a04444;
-      --grid-line:      rgba(0,0,0,0.03);
-    }
-
-    .theme-toggle {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 100;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid var(--border2);
-      background: var(--surface2);
-      color: var(--muted);
-      font-size: 17px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .theme-toggle:hover {
-      border-color: var(--accent-border);
-      color: var(--accent);
-      transform: scale(1.08);
     }
 
     html, body { height: 100%; }
@@ -91,8 +46,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
       background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
@@ -452,61 +407,61 @@
 <body>
 <div id="root"></div>
 <script>
-const { useState } = React;
+const { useState, useEffect } = React;
+const API_URL = 'https://tetsugaku-platform.onrender.com/api';
 const e = React.createElement;
 
 // ── Default demo questions ──────────────────────────────────────────────────
-// 多数派の根拠: PhilPapers 2020 哲学者調査（約1785名）より
 const defaultQuestions = [
   {
     id: 1,
     type1: {
-      q: '【自由意志】人間の「自由意志」は、自然法則と両立できると思いますか？\n（例：決定論が正しくても、意味のある自由意志は存在しうる）',
-      options: ['両立できる（相容論）', '両立できない（非相容論）', '自由意志は存在しない'],
+      q: '2026年より施行された「税金や社会保険料を滞納した外国人の永住権を取り消す」新制度について、あなたはどう思いますか？',
+      options: ['賛成', '中立', '反対'],
       majorityIndex: 0,
       type: 'majority'
     },
-    type2: { q: 'あなたの回答は哲学者の間で「多数派（1位）」だと思いますか？', options: ['多数派', '少数派'] }
+    type2: { q: 'あなたの回答は「多数派（1位）」だと思いますか？', options: ['多数派', '少数派'] }
   },
   {
     id: 2,
     type1: {
-      q: '【心の哲学】意識や思考などの「心」は、最終的には脳の物理的プロセスに還元できると思いますか？',
-      options: ['還元できる（物理主義）', '還元できない（非物理主義）', 'どちらともいえない'],
-      percentBuckets: [1, 3, 2],
+      q: '政府が「特定技能ビザ」の対象分野をほぼ全ての産業に拡大したことについて、どう思いますか？',
+      options: ['賛成', '中立', '反対'],
+      percentBuckets: [1, 3, 0],
       type: 'percent'
     },
-    type2: { q: '哲学者の中で「還元できる（物理主義）」を選んだ人は何割くらいいると思いますか？', options: ['80%以上', '50%~79%', '20%~49%', '20%未満'] }
+    type2: { q: 'あなたと「同じ回答」を選んだ人は何割くらいいると思いますか？', options: ['80%以上', '50%~79%', '20%~49%', '20%未満'] }
   },
   {
     id: 3,
     type1: {
-      q: '【意識理論】意識の本質を最もよく説明する理論はどれだと思いますか？',
-      options: ['機能主義（心は情報処理）', '二元論（心と体は別物）', '汎心論（全てに意識がある）', '消去主義（意識は幻想）'],
-      ranks: [0, 2, 1, 3],
+      q: '永住権を持つ外国人に対し、地方選挙での「投票権」を認めるべきだと思いますか？',
+      options: ['強く賛成', '賛成', '反対', '強く反対'],
+      ranks: [2, 1, 0, 3],
       type: 'rank'
     },
-    type2: { q: '哲学者の間で「最も多く支持されている」意識理論はどれだと思いますか？', options: ['機能主義（心は情報処理）', '二元論（心と体は別物）', '汎心論（全てに意識がある）', '消去主義（意識は幻想）'] }
+    type2: { q: '一般大衆の間で「最も多く選ばれた」回答はどれだと思いますか？', options: ['強く賛成', '賛成', '反対', '強く反対'] }
   },
   {
     id: 4,
     type1: {
-      q: '【認識論】経験に依らず、理性や直観だけで得られる「ア・プリオリな知識」は存在すると思いますか？\n（例：「2+2=4」「全ての独身者は未婚だ」など）',
-      options: ['存在する', '存在しない', 'どちらともいえない'],
+      q: '全ての就労・配偶者ビザの更新時に、基礎的な「日本語能力テスト」の合格を義務付ける政策を支持しますか？',
+      options: ['支持する', '支持しない', 'わからない'],
       majorityIndex: 0,
       type: 'majority'
     },
-    type2: { q: 'あなたの回答は哲学者の間で「多数派（1位）」だと思いますか？', options: ['多数派', '少数派'] }
+    type2: { q: 'あなたの回答は「多数派（1位）」ですか？', options: ['多数派', '少数派'] }
   },
   {
     id: 5,
     type1: {
-      q: '【拡張心仮説】スマートフォンのメモや外部ツールは、私たちの「心」の一部と見なせると思いますか？\n（拡張心仮説：心は頭蓋骨の外にも広がりうる）',
-      options: ['そう思う（拡張心を支持）', 'そう思わない', 'わからない'],
+      q: '公権力の行使を伴わない地方公務員における、外国籍住民の採用制限撤廃についてどう思いますか？',
+      options: ['賛成', '反対', 'わからない'],
       over50Index: 0,
       type: 'over50'
     },
-    type2: { q: '「拡張心仮説」を支持する哲学者は過半数いると思いますか？', options: ['過半数だと思う', '過半数ではない'] }
+    type2: { q: 'この政策に「賛成」している人は日本社会で過半数だと思いますか？', options: ['過半数だと思う', '過半数ではない'] }
   }
 ];
 
@@ -536,11 +491,11 @@ function scoreAnswer(q, t1Idx, t2Idx, confidence) {
 }
 
 const getTitleData = (s) => {
-  if (s < 0)    return { jp: 'ソフィストの迷子',   en: 'Lost Sophist',        color: '#7a7870' };
-  if (s <= 150) return { jp: '洞窟の囚人',         en: 'Prisoner of the Cave', color: '#5b8fd4' };
-  if (s <= 300) return { jp: '哲学の探究者',       en: 'Philosophical Seeker', color: '#5aad87' };
-  if (s <= 450) return { jp: 'ソクラテスの弟子',   en: 'Disciple of Socrates', color: '#9b85d4' };
-  return          { jp: 'プラトンの哲人王',         en: 'Philosopher King',     color: '#c8a96e' };
+  if (s < 0)    return { jp: '迷える羊',         en: 'Lost Sheep',                  color: '#7a7870' };
+  if (s <= 150) return { jp: '一般市民',         en: 'Ordinary Citizen',            color: '#5b8fd4' };
+  if (s <= 300) return { jp: '世論の観察者',     en: 'Observer of Public Opinion',  color: '#5aad87' };
+  if (s <= 450) return { jp: 'トレンドリーダー', en: 'Trend Leader',                color: '#9b85d4' };
+  return          { jp: '集合知の預言者',         en: 'Prophet of Collective Wisdom', color: '#c8a96e' };
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -560,25 +515,37 @@ function GamePage({ questions, onBack }) {
   const accuracy = history.length ? Math.round(history.filter(h => h.correct).length / history.length * 100) : 0;
   const alignRate= history.length ? Math.round(history.filter(h => h.aligned).length / history.length * 100) : 0;
 
+  const submitAnswer = (questionId, choiceId, predictedMajority) => {
+  fetch(`${API_URL}/answers/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: questionId,
+      choice: choiceId,
+      predicted_majority: predictedMajority
+    })
+  }).catch(err => console.error('Answer submit error:', err));
+};
   const handleStart = () => {
     setStep('type1'); setQIndex(0); setHistory([]);
     setT1Idx(null); setT2Idx(null); setConfidence(50);
   };
   const handleT1 = (idx) => { setT1Idx(idx); setStep('type23'); setT2Idx(null); setConfidence(50); };
-  const handleBet = () => {
-    const result = scoreAnswer(currentQ, t1Idx, t2Idx, confidence);
-    const newHistory = [...history, result];
-    setHistory(newHistory);
-    if (qIndex < questions.length - 1) { setQIndex(qIndex + 1); setStep('type1'); setT1Idx(null); }
-    else setStep('result');
-  };
+const handleBet = () => {
+  const result = scoreAnswer(currentQ, t1Idx, t2Idx, confidence);
+  const newHistory = [...history, result];
+  setHistory(newHistory);
+  submitAnswer(questions[qIndex].id, t1Idx, t2Idx !== null);
+  if (qIndex < questions.length - 1) { setQIndex(qIndex + 1); setStep('type1'); setT1Idx(null); }
+  else setStep('result');
+};
 
   const progress  = (qIndex + (step === 'result' ? 1 : 0)) / questions.length * 100;
   const titleData = getTitleData(total);
 
   const header = e('div', { className: 'topbar' },
     e('button', { className: 'topbar-back', onClick: onBack }, '← トップへ戻る'),
-    e('div', { className: 'topbar-title' }, '哲学の鏡'),
+    e('div', { className: 'topbar-title' }, '世論の鏡'),
     (step !== 'start' && step !== 'result')
       ? e('span', { className: 'badge' }, `Q ${qIndex + 1} / ${questions.length}`)
       : e('span', null)
@@ -587,10 +554,10 @@ function GamePage({ questions, onBack }) {
   const startScreen = e('div', { className: 'body animate', style: { textAlign: 'center', padding: '44px 24px' } },
     e('span', { style: { fontSize: 36, display: 'block', marginBottom: 20 } }, '🪞'),
     e('h2', { style: { fontFamily: "'Noto Serif JP',serif", fontSize: 18, fontWeight: 600, color: 'var(--text)', marginBottom: 12, lineHeight: 1.7 } },
-      'あなたの哲学直観は', e('br'), '哲学者の多数派と一致するか？'
+      'あなたは社会の「多数派」を', e('br'), 'どこまで予測できますか？'
     ),
     e('p', { style: { fontSize: 12, color: 'var(--muted)', lineHeight: 1.8, maxWidth: 360, margin: '0 auto 28px' } },
-      '認識論・心の哲学・元認知に関する問いに答え、世界の哲学者たちの多数派意見を予測してください。自信度を賭けることでスコアが変動します。根拠はPhilPapers 2020調査（約1785名）です。'
+      '各設問に対するあなたの意見を選択した後、世論の多数派を予測してください。自信度を賭けることでスコアが変動します。'
     ),
     e('button', { className: 'btn-primary', onClick: handleStart }, 'ゲームを開始する →')
   );
@@ -645,8 +612,8 @@ function GamePage({ questions, onBack }) {
 
   const resultScreen = e('div', { className: 'body animate' },
     e('div', { className: 'progress-wrap' }, e('div', { className: 'progress-bar', style: { width: '100%' } })),
-    e('p', { style: { fontFamily: "'Noto Serif JP',serif", fontSize: 17, fontWeight: 600, color: 'var(--text)', textAlign: 'center', marginBottom: 4 } }, 'あなたの哲学レーダー'),
-    e('p', { style: { fontSize: 12, color: 'var(--muted)', textAlign: 'center', marginBottom: 28 } }, 'あなたの哲学的直観の結果'),
+    e('p', { style: { fontFamily: "'Noto Serif JP',serif", fontSize: 17, fontWeight: 600, color: 'var(--text)', textAlign: 'center', marginBottom: 4 } }, 'あなたの社会レーダー'),
+    e('p', { style: { fontSize: 12, color: 'var(--muted)', textAlign: 'center', marginBottom: 28 } }, 'Your Social Radar Results'),
     e('div', { className: 'stat-grid' },
       e('div', { className: 'stat-card' }, e('div', { className: 'stat-label' }, '予測正確率'), e('div', { className: 'stat-val' }, `${accuracy}%`)),
       e('div', { className: 'stat-card' }, e('div', { className: 'stat-label' }, '多数派一致率'), e('div', { className: 'stat-val' }, `${alignRate}%`)),
@@ -663,9 +630,6 @@ function GamePage({ questions, onBack }) {
       e('div', { className: 'title-jp', style: { color: titleData.color } }, titleData.jp),
       e('div', { className: 'title-en' }, titleData.en)
     ),
-    e('div', { style: { background: 'var(--info-bg)', border: '1px solid var(--info-border)', borderRadius: 'var(--radius)', padding: '12px 16px', fontSize: 11, color: 'var(--info)', lineHeight: 1.8, margin: '14px 0' } },
-      '📊 多数派の根拠：PhilPapers 2020哲学者調査（約1785名）に基づいています。自由意志→相容論62%、意識→機能主義が1位、物理主義→過半数、ア・プリオリ知識→存在する多数、拡張心仮説→支持が多数。'
-    ),
     e('button', { className: 'btn-ghost', onClick: handleStart }, 'もう一度プレイする')
   );
 
@@ -678,7 +642,7 @@ function GamePage({ questions, onBack }) {
         step === 'type23' && type23Screen,
         step === 'result' && resultScreen
       ),
-      e('p', { className: 'page-footer' }, '多数派の根拠はPhilPapers 2020哲学者調査（約1785名）に基づきます。')
+      e('p', { className: 'page-footer' }, 'データはデモンストレーション用のシミュレーションです。')
     )
   );
 }
@@ -829,29 +793,29 @@ function ExperimenterPage({ onPublish, onBack }) {
 // ══════════════════════════════════════════════════════════════════════════════
 function HomePage({ onPlayer, onExperimenter }) {
   return e('div', { className: 'home-wrap animate' },
-    e('div', { className: 'home-logo' }, 'JIKKEN-TETSUGAKU.ONLINE'),
-    e('h1', { className: 'home-title' }, '実験哲学ゲームプラットフォーム'),
+    e('div', { className: 'home-logo' }, 'TETSUGAKU.ONLINE'),
+    e('h1', { className: 'home-title' }, '実践哲学ゲームプラットフォーム'),
     e('p', { className: 'home-sub' },
-      '認識論・心の哲学・元認知の問いに答え、世界の哲学者たちの多数派意見を予測する実験型ゲームプラットフォームです。' +
-      'プレイヤーとして参加するか、実験者として新しい設問を設計してください。'
+      '哲学的な問いと世論予測を組み合わせた実験型ゲームプラットフォームです。' +
+      'プレイヤーとして参加するか、実験者として新しい実験を設計してください。'
     ),
     e('div', { className: 'home-cards' },
       e('div', { className: 'entry-card player', onClick: onPlayer },
         e('span', { className: 'entry-icon' }, '🎮'),
-        e('span', { className: 'entry-role player' }, 'プレイヤー'),
+        e('span', { className: 'entry-role player' }, 'Player'),
         e('div', { className: 'entry-title' }, 'プレイヤーとして参加する'),
-        e('p', { className: 'entry-desc' }, '公開されている実験に参加し、哲学者の多数派意見を予測するゲームをプレイします。'),
+        e('p', { className: 'entry-desc' }, '公開されている実験に参加し、世論の多数派を予測するゲームをプレイします。'),
         e('span', { className: 'entry-arrow' }, '→')
       ),
       e('div', { className: 'entry-card experimenter', onClick: onExperimenter },
         e('span', { className: 'entry-icon' }, '🔬'),
-        e('span', { className: 'entry-role experimenter' }, '実験者'),
+        e('span', { className: 'entry-role experimenter' }, 'Experimenter'),
         e('div', { className: 'entry-title' }, '実験者として設計する'),
         e('p', { className: 'entry-desc' }, '新しい実験哲学の設問を作成し、プレイヤーに公開するゲームを設計します。'),
         e('span', { className: 'entry-arrow' }, '→')
       )
     ),
-    e('p', { className: 'home-footer' }, '実験哲学ゲームプラットフォーム — デモ版')
+    e('p', { className: 'home-footer' }, '実践哲学ゲームプラットフォーム — Demo Version')
   );
 }
 
@@ -859,30 +823,40 @@ function HomePage({ onPlayer, onExperimenter }) {
 // ROOT
 // ══════════════════════════════════════════════════════════════════════════════
 function App() {
-  const [page, setPage]           = useState('home');
-  const [gameQuestions, setGameQ] = useState(defaultQuestions);
-  const [isDark, setIsDark]       = useState(true);
+  const [page, setPage] = useState('home');
+  const [experiments, setExperiments] = useState([]);
+  const [gameQuestions, setGameQ] = useState([]);
+
+  useEffect(() => {
+  fetch(`${API_URL}/experiments/`)
+    .then(res => res.json())
+    .then(data => {
+      setExperiments(data);
+      if (data.length > 0) {
+        const converted = data[0].questions.map(q => ({
+          id: q.id,
+          type1: {
+            q: q.text,
+            options: q.choices.map(c => c.text),
+            majorityIndex: q.choices.findIndex(c => c.is_majority),
+            type: 'majority'
+          },
+          type2: {
+            q: 'あなたの回答は「多数派（1位）」だと思いますか？',
+            options: ['多数派', '少数派']
+          }
+        }));
+        setGameQ(converted);
+      }
+    })
+    .catch(err => console.error('API error:', err));
+}, []);
 
   const handlePublish = (questions) => setGameQ(questions);
 
-  const toggleTheme = () => {
-    setIsDark(d => {
-      const next = !d;
-      document.documentElement.classList.toggle('light', !next);
-      return next;
-    });
-  };
-
-  return e(React.Fragment, null,
-    e('button', {
-      className: 'theme-toggle',
-      onClick: toggleTheme,
-      title: isDark ? 'ライトモードに切替' : 'ダークモードに切替'
-    }, isDark ? '☀️' : '🌙'),
-    page === 'player'       ? e(GamePage,         { questions: gameQuestions, onBack: () => setPage('home') })
-    : page === 'experimenter' ? e(ExperimenterPage, { onPublish: handlePublish, onBack: () => setPage('home') })
-    : e(HomePage, { onPlayer: () => setPage('player'), onExperimenter: () => setPage('experimenter') })
-  );
+  if (page === 'player')       return e(GamePage,         { questions: gameQuestions, onBack: () => setPage('home') });
+  if (page === 'experimenter') return e(ExperimenterPage, { onPublish: handlePublish, onBack: () => setPage('home') });
+  return e(HomePage, { onPlayer: () => setPage('player'), onExperimenter: () => setPage('experimenter'), experiments });
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
