@@ -1,120 +1,564 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>実験哲学プラットフォーム</title>
-
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-
   <style>
-    body { font-family: sans-serif; padding: 20px; background:#f5f5f5 }
-    .card { background:white; padding:20px; border-radius:10px; margin-bottom:15px; cursor:pointer }
-    .btn { padding:10px 16px; background:#333; color:white; border:none; cursor:pointer }
+    :root {
+      --bg: #0f0f0f;
+      --bg2: #1a1a1a;
+      --bg3: #242424;
+      --border: #2e2e2e;
+      --text: #e8e8e0;
+      --text2: #888880;
+      --text3: #555550;
+      --accent: #c8b88a;
+      --accent2: #8a9ab8;
+      --card-hover: #222218;
+      --btn-bg: #c8b88a;
+      --btn-text: #0f0f0f;
+    }
+    [data-theme="light"] {
+      --bg: #f4f1eb;
+      --bg2: #ebe7df;
+      --bg3: #ffffff;
+      --border: #d4cfc5;
+      --text: #1a1a16;
+      --text2: #6b6860;
+      --text3: #a8a49a;
+      --accent: #8a6f3a;
+      --accent2: #4a5a7a;
+      --card-hover: #f0ece2;
+      --btn-bg: #1a1a16;
+      --btn-text: #f4f1eb;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .shell {
+      max-width: 680px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- TOPBAR --- */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+    }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .progress-label { font-size: 12px; color: var(--text3); letter-spacing: 0.05em; }
+
+    .theme-btn {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .theme-btn::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform 0.3s;
+    }
+    [data-theme="light"] .theme-btn::after { transform: translateX(16px); }
+
+    /* --- MAIN CONTENT --- */
+    .content {
+      flex: 1;
+      padding: 48px 24px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- HOME --- */
+    .home-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .home-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 400;
+      line-height: 1.4;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .home-desc {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text2);
+      margin-bottom: 48px;
+      max-width: 480px;
+    }
+    .home-meta {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    .home-meta-item { font-size: 13px; color: var(--text3); }
+    .home-meta-item strong { display: block; font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .divider { width: 40px; height: 1px; background: var(--border); margin: 0 0 48px; }
+
+    /* --- SURVEY LIST --- */
+    .list-header { margin-bottom: 32px; }
+    .list-header h2 { font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+    .list-header p { font-size: 14px; color: var(--text2); }
+
+    .survey-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .survey-card:hover { background: var(--card-hover); border-color: var(--accent); }
+    .survey-card-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+    .survey-card-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    .survey-card-arrow { font-size: 18px; color: var(--text3); flex-shrink: 0; margin-left: 16px; }
+
+    /* --- PLAYER --- */
+    .question-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .q-tag {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 3px 8px;
+    }
+    .q-category { font-size: 13px; color: var(--text3); }
+
+    .question-text {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(16px, 2.5vw, 20px);
+      font-weight: 400;
+      line-height: 1.8;
+      color: var(--text);
+      margin-bottom: 36px;
+    }
+
+    .choice-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 16px 20px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+    .choice-btn:hover { background: var(--card-hover); border-color: var(--accent); transform: translateX(4px); }
+    .choice-btn:active { transform: translateX(2px); }
+
+    /* progress bar */
+    .progress-bar-wrap { margin-bottom: 40px; }
+    .progress-bar-track {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+    .progress-bar-text {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    /* --- CONFIRM PAGE --- */
+    .confirm-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px;
+      text-align: center;
+      background: var(--bg2);
+    }
+    .confirm-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 22px;
+    }
+    .confirm-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .confirm-desc { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
+    .confirm-summary {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 36px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg3);
+    }
+    .confirm-stat { text-align: center; }
+    .confirm-stat-num { font-size: 28px; font-weight: 500; color: var(--text); display: block; }
+    .confirm-stat-label { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .confirm-btns { display: flex; gap: 12px; }
+
+    /* --- DONE PAGE --- */
+    .done-wrap { text-align: center; padding: 20px 0; }
+    .done-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 32px;
+      font-size: 32px;
+    }
+    .done-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+    .done-sub { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 48px; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .done-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .done-stat-card {
+      padding: 20px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .done-stat-card .num { font-size: 32px; font-weight: 500; color: var(--accent); display: block; }
+    .done-stat-card .lbl { font-size: 12px; color: var(--text3); margin-top: 4px; letter-spacing: 0.05em; }
+    .done-thank {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      margin-bottom: 32px;
+    }
+
+    /* --- SHARED BUTTONS --- */
+    .btn-primary {
+      display: inline-block;
+      padding: 14px 32px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      display: inline-block;
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      flex: 1;
+    }
+    .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+    .btn-ghost {
+      background: none;
+      border: none;
+      color: var(--text3);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 0;
+      font-family: 'DM Sans', sans-serif;
+      transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    .back-row { margin-bottom: 32px; }
+    .loading { font-size: 14px; color: var(--text3); padding: 40px 0; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.4s ease both; }
   </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script>
-const { useState, useEffect } = React;
+const { useState, useEffect, useCallback } = React;
 const e = React.createElement;
 
 const API_URL = "https://tetsugaku-platform.onrender.com/api";
 
+function generateSession() {
+  return 'sess_' + Math.random().toString(36).substr(2, 12) + '_' + Date.now();
+}
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(true);
+  const toggle = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light');
+  };
+  return e('button', { className: 'theme-btn', onClick: toggle, title: dark ? 'ライトモードへ' : 'ダークモードへ' });
+}
+
 function Home({ goList }) {
-  return e('div', null,
-    e('h2', null, '実験哲学プラットフォーム'),
-    e('button', { className:'btn', onClick: goList }, '実験に参加する')
+  return e('div', { className: 'content fade-up' },
+    e('p', { className: 'home-eyebrow' }, '実験哲学プラットフォーム'),
+    e('h1', { className: 'home-title' }, '哲学の問いに\n答えてみよう'),
+    e('p', { className: 'home-desc' },
+      '認識論、倫理学、形而上学など、哲学の様々なテーマについての問いに答えてください。あなたの回答は研究に活用されます。'
+    ),
+    e('div', { className: 'home-meta' },
+      e('div', { className: 'home-meta-item' }, e('strong', null, '18'), '問題'),
+      e('div', { className: 'home-meta-item' }, e('strong', null, '4'), 'カテゴリー'),
+      e('div', { className: 'home-meta-item' }, e('strong', null, '10'), '分程度'),
+    ),
+    e('div', { className: 'divider' }),
+    e('button', { className: 'btn-primary', onClick: goList }, '実験一覧を見る →')
   );
 }
 
 function SurveyList({ goBack, goPlay }) {
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_URL + '/surveys/')
       .then(r => r.json())
-      .then(setList);
+      .then(data => { setList(data.filter(s => s.is_published)); setLoading(false); });
   }, []);
 
-  return e('div', null,
-    e('button', { onClick: goBack }, '←戻る'),
-    e('h3', null, '実験一覧'),
-
-    list.map(s =>
-      e('div', {
-        key: s.id,
-        className: 'card',
-        onClick: () => goPlay(s)
-      },
-        e('div', null, s.title),
-        e('div', null, s.description)
-      )
-    )
+  return e('div', { className: 'content fade-up' },
+    e('div', { className: 'back-row' },
+      e('button', { className: 'btn-ghost', onClick: goBack }, '← 戻る')
+    ),
+    e('div', { className: 'list-header' },
+      e('h2', null, '実験一覧'),
+      e('p', null, '参加したい実験を選んでください')
+    ),
+    loading
+      ? e('p', { className: 'loading' }, '読み込み中...')
+      : list.map(s =>
+          e('div', {
+            key: s.id,
+            className: 'survey-card',
+            onClick: () => goPlay(s)
+          },
+            e('div', null,
+              e('div', { className: 'survey-card-title' }, s.title),
+              e('div', { className: 'survey-card-desc' }, s.description)
+            ),
+            e('span', { className: 'survey-card-arrow' }, '›')
+          )
+        )
   );
 }
 
 function Player({ survey, goBack }) {
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [phase, setPhase] = useState('playing'); // playing | confirm | done
+  const [sessionKey] = useState(() => generateSession());
+  const [categoryMap, setCategoryMap] = useState({});
 
   useEffect(() => {
     fetch(API_URL + '/surveys/' + survey.id + '/')
       .then(r => r.json())
       .then(data => {
-
         let raw = [];
-
+        let cmap = {};
         if (Array.isArray(data.categories)) {
           data.categories.forEach(c => {
             if (Array.isArray(c.questions)) {
+              c.questions.forEach(q => { cmap[q.id] = c.name; });
               raw = raw.concat(c.questions);
             }
           });
         }
-
         setQuestions(raw);
+        setCategoryMap(cmap);
       });
-
   }, []);
 
+  const handleChoice = (q, choice) => {
+    const newAnswers = [...answers, { question: q.id, choice: choice.id }];
+    setAnswers(newAnswers);
+    if (idx < questions.length - 1) {
+      setIdx(idx + 1);
+    } else {
+      setPhase('confirm');
+    }
+  };
+
+  const handleSubmit = () => {
+    answers.forEach(ans => {
+      fetch(API_URL + '/answers/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...ans, session_key: sessionKey })
+      });
+    });
+    setPhase('done');
+  };
+
   if (questions.length === 0) {
-    return e('div', null, 'loading...');
+    return e('div', { className: 'content' }, e('p', { className: 'loading' }, '読み込み中...'));
   }
 
+  // --- CONFIRM PAGE ---
+  if (phase === 'confirm') {
+    return e('div', { className: 'content fade-up' },
+      e('div', { className: 'confirm-box' },
+        e('div', { className: 'confirm-icon' }, '✓'),
+        e('h2', { className: 'confirm-title' }, '回答を提出しますか？'),
+        e('p', { className: 'confirm-desc' },
+          'すべての問題に回答しました。\n提出後は変更できません。'
+        ),
+        e('div', { className: 'confirm-summary' },
+          e('div', { className: 'confirm-stat' },
+            e('span', { className: 'confirm-stat-num' }, questions.length),
+            e('span', { className: 'confirm-stat-label' }, '回答済み')
+          ),
+          e('div', { className: 'confirm-stat' },
+            e('span', { className: 'confirm-stat-num' }, '4'),
+            e('span', { className: 'confirm-stat-label' }, 'カテゴリー')
+          )
+        ),
+        e('div', { className: 'confirm-btns' },
+          e('button', { className: 'btn-secondary', onClick: () => { setIdx(questions.length - 1); setAnswers(answers.slice(0,-1)); setPhase('playing'); } }, '最後の問題へ戻る'),
+          e('button', { className: 'btn-primary', style: { flex: 1 }, onClick: handleSubmit }, '提出する')
+        )
+      )
+    );
+  }
+
+  // --- DONE PAGE ---
+  if (phase === 'done') {
+    return e('div', { className: 'content fade-up' },
+      e('div', { className: 'done-wrap' },
+        e('div', { className: 'done-circle' }, '✦'),
+        e('h2', { className: 'done-title' }, 'ご参加ありがとうございました'),
+        e('p', { className: 'done-sub' },
+          'あなたの回答は正常に記録されました。この研究へのご協力に心より感謝申し上げます。'
+        ),
+        e('div', { className: 'done-stats' },
+          e('div', { className: 'done-stat-card' },
+            e('span', { className: 'num' }, questions.length),
+            e('span', { className: 'lbl' }, '回答済み問題数')
+          ),
+          e('div', { className: 'done-stat-card' },
+            e('span', { className: 'num' }, '4'),
+            e('span', { className: 'lbl' }, 'カテゴリー')
+          )
+        ),
+        e('p', { className: 'done-thank' },
+          'このプラットフォームは実験哲学の研究を目的としています。\n収集されたデータは学術的な分析のみに使用されます。'
+        ),
+        e('button', { className: 'btn-primary', onClick: goBack }, '実験一覧へ戻る')
+      )
+    );
+  }
+
+  // --- PLAYING ---
   const q = questions[idx];
+  const pct = Math.round((idx / questions.length) * 100);
+  const catName = categoryMap[q.id] || '';
 
-  return e('div', null,
-    e('button', { onClick: goBack }, '←一覧へ'),
-
-    e('h3', null, survey.title),
-
-    e('p', null, q.text),
-
+  return e('div', { className: 'content fade-up' },
+    e('div', { className: 'back-row' },
+      e('button', { className: 'btn-ghost', onClick: goBack }, '← 一覧へ')
+    ),
+    e('div', { className: 'progress-bar-wrap' },
+      e('div', { className: 'progress-bar-track' },
+        e('div', { className: 'progress-bar-fill', style: { width: pct + '%' } })
+      ),
+      e('p', { className: 'progress-bar-text' }, (idx + 1) + ' / ' + questions.length)
+    ),
+    e('div', { className: 'question-meta' },
+      e('span', { className: 'q-tag' }, 'Q' + (idx + 1)),
+      e('span', { className: 'q-category' }, catName)
+    ),
+    e('p', { className: 'question-text' }, q.text),
     q.choices.map(c =>
-      e('div', {
+      e('button', {
         key: c.id,
-        className: 'card',
-        onClick: () => {
-
-          fetch(API_URL + '/answers/', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({
-              question: q.id,
-              choice: c.id
-            })
-          });
-
-          if (idx < questions.length - 1) {
-            setIdx(idx + 1);
-          } else {
-            alert('完了');
-          }
-
-        }
+        className: 'choice-btn',
+        onClick: () => handleChoice(q, c)
       }, c.text)
     )
   );
@@ -123,28 +567,36 @@ function Player({ survey, goBack }) {
 function App() {
   const [page, setPage] = useState('home');
   const [survey, setSurvey] = useState(null);
+  const [progress, setProgress] = useState(null);
 
-  if (page === 'list') {
-    return e(SurveyList, {
-      goBack: () => setPage('home'),
-      goPlay: (s) => { setSurvey(s); setPage('play'); }
-    });
-  }
+  const renderContent = () => {
+    if (page === 'list') {
+      return e(SurveyList, {
+        goBack: () => setPage('home'),
+        goPlay: (s) => { setSurvey(s); setPage('play'); }
+      });
+    }
+    if (page === 'play') {
+      return e(Player, {
+        survey,
+        goBack: () => setPage('list')
+      });
+    }
+    return e(Home, { goList: () => setPage('list') });
+  };
 
-  if (page === 'play') {
-    return e(Player, {
-      survey,
-      goBack: () => setPage('list')
-    });
-  }
-
-  return e(Home, {
-    goList: () => setPage('list')
-  });
+  return e('div', { className: 'shell' },
+    e('div', { className: 'topbar' },
+      e('span', { className: 'topbar-title' }, '実験哲学プラットフォーム'),
+      e('div', { className: 'topbar-right' },
+        e(ThemeToggle)
+      )
+    ),
+    renderContent()
+  );
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
 </script>
-
 </body>
 </html>
