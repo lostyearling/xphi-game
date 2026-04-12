@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="dark">
+<html lang="ja" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -397,7 +397,7 @@ function generateSession() {
 }
 
 function ThemeToggle() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
   const toggle = () => {
     const next = !dark;
     setDark(next);
@@ -522,15 +522,21 @@ function Player({ survey, goBack }) {
     }
   };
 
-  const handleSubmit = () => {
-    answers.forEach(ans => {
-      fetch(API_URL + '/answers/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...ans, session_key: sessionKey })
-      });
-    });
-    setPhase('done');
+  const handleSubmit = async () => {
+    setPhase('submitting');
+    try {
+      await Promise.all(answers.map(ans =>
+        fetch(API_URL + '/answers/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...ans, session_key: sessionKey })
+        }).then(r => { if (!r.ok) throw new Error('送信失敗'); })
+      ));
+      setPhase('done');
+    } catch (err) {
+      alert('送信中にエラーが発生しました。もう一度お試しください。');
+      setPhase('confirm');
+    }
   };
 
   if (phase === 'nickname') {
@@ -564,6 +570,16 @@ function Player({ survey, goBack }) {
 
   if (questions.length === 0) {
     return e('div', { className: 'content' }, e('p', { className: 'loading' }, '読み込み中...'));
+  }
+
+  // --- SUBMITTING PAGE ---
+  if (phase === 'submitting') {
+    return e('div', { className: 'content fade-up' },
+      e('div', { className: 'done-wrap' },
+        e('div', { className: 'done-circle' }, '…'),
+        e('p', { className: 'done-sub' }, '送信中です。しばらくお待ちください。')
+      )
+    );
   }
 
   // --- CONFIRM PAGE ---
