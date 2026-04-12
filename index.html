@@ -628,6 +628,7 @@ function SurveyPlayerPage({ survey, onBack }) {
       .then(data => {
         if (!active) return;
 
+<<<<<<< HEAD
         let rawQuestions = [];
 
 if (Array.isArray(data.categories)) {
@@ -637,6 +638,9 @@ if (Array.isArray(data.categories)) {
     }
   });
 }
+=======
+        const rawQuestions = Array.isArray(data.questions) ? data.questions : [];
+>>>>>>> 9417fa7ab37fa590b80bde9854b294aac0c779bf
         const normalizedQuestions = rawQuestions.map(normalizeQuestion).filter(q => q.choices.length > 0);
 
         setQuestions(normalizedQuestions);
