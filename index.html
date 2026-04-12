@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>実践哲学ゲームプラットフォーム</title>
+  <title>実験哲学ゲームプラットフォーム</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Noto+Sans+JP:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -11,24 +11,44 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:             #0e0e0f;
-      --surface:        #17171a;
-      --surface2:       #1f1f24;
-      --border:         rgba(255,255,255,0.08);
-      --border2:        rgba(255,255,255,0.14);
-      --text:           #f0ede8;
-      --muted:          #7a7870;
-      --accent:         #c8a96e;
-      --accent-bg:      rgba(200,169,110,0.10);
-      --accent-border:  rgba(200,169,110,0.30);
-      --info:           #5b8fd4;
-      --info-bg:        rgba(91,143,212,0.10);
-      --info-border:    rgba(91,143,212,0.30);
-      --success:        #5aad87;
-      --danger:         #c46b6b;
-      --radius:         10px;
-      --radius-lg:      16px;
-    }
+  --bg:             #f5f4f0;
+  --surface:        #ffffff;
+  --surface2:       #f0eeea;
+  --border:         rgba(0,0,0,0.08);
+  --border2:        rgba(0,0,0,0.14);
+  --text:           #1a1a1b;
+  --muted:          #8a8880;
+  --accent:         #9a7a3e;
+  --accent-bg:      rgba(154,122,62,0.10);
+  --accent-border:  rgba(154,122,62,0.30);
+  --info:           #3a6fb4;
+  --info-bg:        rgba(58,111,180,0.10);
+  --info-border:    rgba(58,111,180,0.30);
+  --success:        #3a8d67;
+  --danger:         #c46b6b;
+  --radius:         10px;
+  --radius-lg:      16px;
+}
+
+:root.dark {
+  --bg:             #0e0e0f;
+  --surface:        #17171a;
+  --surface2:       #1f1f24;
+  --border:         rgba(255,255,255,0.08);
+  --border2:        rgba(255,255,255,0.14);
+  --text:           #f0ede8;
+  --muted:          #7a7870;
+  --accent:         #c8a96e;
+  --accent-bg:      rgba(200,169,110,0.10);
+  --accent-border:  rgba(200,169,110,0.30);
+  --info:           #5b8fd4;
+  --info-bg:        rgba(91,143,212,0.10);
+  --info-border:    rgba(91,143,212,0.30);
+  --success:        #5aad87;
+  --danger:         #c46b6b;
+  --radius:         10px;
+  --radius-lg:      16px;
+}
 
     html, body { height: 100%; }
 
@@ -408,6 +428,22 @@
 <div id="root"></div>
 <script>
 const { useState, useEffect } = React;
+function ThemeToggle() {
+  const [dark, setDark] = useState(false);
+  const toggle = () => {
+    setDark(!dark);
+    document.documentElement.classList.toggle('dark');
+  };
+  return e('button', {
+    onClick: toggle,
+    style: {
+      position: 'fixed', top: '12px', right: '12px', zIndex: 1000,
+      background: 'var(--surface2)', border: '1px solid var(--border2)',
+      color: 'var(--text)', borderRadius: '20px', padding: '6px 14px',
+      fontSize: '12px', cursor: 'pointer', fontFamily: "'DM Mono', monospace"
+    }
+  }, dark ? '☀️ Light' : '🌙 Dark');
+}
 const API_URL = 'https://tetsugaku-platform.onrender.com/api';
 const e = React.createElement;
 
@@ -794,17 +830,16 @@ function ExperimenterPage({ onPublish, onBack }) {
 function HomePage({ onPlayer, onExperimenter }) {
   return e('div', { className: 'home-wrap animate' },
     e('div', { className: 'home-logo' }, 'TETSUGAKU.ONLINE'),
-    e('h1', { className: 'home-title' }, '実践哲学ゲームプラットフォーム'),
+    e('h1', { className: 'home-title' }, '実験哲学ゲームプラットフォーム'),
     e('p', { className: 'home-sub' },
-      '哲学的な問いと世論予測を組み合わせた実験型ゲームプラットフォームです。' +
-      'プレイヤーとして参加するか、実験者として新しい実験を設計してください。'
+    '認識論・心の哲学・メタ認知の問いにこたえて、キミのこころをそっとのぞいてみよう。直感にしたがって進むうちに、まだ知らない自分の価値観や思考のクセが見えてくるよ。ちょっと不思議でかわいい、こころの探検ゲームへようこそ！'
     ),
     e('div', { className: 'home-cards' },
       e('div', { className: 'entry-card player', onClick: onPlayer },
         e('span', { className: 'entry-icon' }, '🎮'),
         e('span', { className: 'entry-role player' }, 'Player'),
         e('div', { className: 'entry-title' }, 'プレイヤーとして参加する'),
-        e('p', { className: 'entry-desc' }, '公開されている実験に参加し、世論の多数派を予測するゲームをプレイします。'),
+        e('p', { className: 'entry-desc' }, '哲学者の考えをちょっぴり想像しながら、気軽に楽しくプレイしてみてね！'),
         e('span', { className: 'entry-arrow' }, '→')
       ),
       e('div', { className: 'entry-card experimenter', onClick: onExperimenter },
@@ -815,7 +850,7 @@ function HomePage({ onPlayer, onExperimenter }) {
         e('span', { className: 'entry-arrow' }, '→')
       )
     ),
-    e('p', { className: 'home-footer' }, '実践哲学ゲームプラットフォーム — Demo Version')
+    e('p', { className: 'home-footer' }, '実験哲学ゲームプラットフォーム — Demo Version')
   );
 }
 
@@ -859,7 +894,9 @@ function App() {
   return e(HomePage, { onPlayer: () => setPage('player'), onExperimenter: () => setPage('experimenter'), experiments });
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+ReactDOM.createRoot(document.getElementById('root')).render(
+  e(React.Fragment, null, e(ThemeToggle), e(App))
+);
 </script>
 </body>
 </html>
