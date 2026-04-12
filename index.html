@@ -219,6 +219,44 @@
       text-align: right;
     }
 
+    /* --- NICKNAME PAGE --- */
+    .nickname-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px 36px;
+      background: var(--bg2);
+    }
+    .nickname-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .nickname-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .nickname-desc { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
+    .nickname-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      margin-bottom: 8px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .nickname-input:focus { border-color: var(--accent); }
+    .nickname-input::placeholder { color: var(--text3); }
+    .nickname-hint { font-size: 12px; color: var(--text3); margin-bottom: 28px; }
+
     /* --- CONFIRM PAGE --- */
     .confirm-box {
       border: 1px solid var(--border);
@@ -432,8 +470,9 @@ function Player({ survey, goBack }) {
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState([]);
-  const [phase, setPhase] = useState('playing'); // playing | confirm | done
-  const [sessionKey] = useState(() => generateSession());
+  const [phase, setPhase] = useState('nickname'); // nickname | playing | confirm | done
+  const [nickname, setNickname] = useState('');
+  const [sessionKey, setSessionKey] = useState('');
   const [categoryMap, setCategoryMap] = useState({});
 
   useEffect(() => {
@@ -455,6 +494,12 @@ function Player({ survey, goBack }) {
       });
   }, []);
 
+  const handleNicknameSubmit = () => {
+    const name = nickname.trim() || '匿名';
+    setSessionKey(name + '_' + generateSession());
+    setPhase('playing');
+  };
+
   const handleChoice = (q, choice) => {
     const newAnswers = [...answers, { question: q.id, choice: choice.id }];
     setAnswers(newAnswers);
@@ -475,6 +520,35 @@ function Player({ survey, goBack }) {
     });
     setPhase('done');
   };
+
+  if (phase === 'nickname') {
+    return e('div', { className: 'content fade-up' },
+      e('div', { className: 'back-row' },
+        e('button', { className: 'btn-ghost', onClick: goBack }, '← 一覧へ')
+      ),
+      e('div', { className: 'nickname-box' },
+        e('p', { className: 'nickname-eyebrow' }, survey.title),
+        e('h2', { className: 'nickname-title' }, '参加前にニックネームを入力してください'),
+        e('p', { className: 'nickname-desc' },
+          'このニックネームは回答の識別に使用されます。本名でなくて構いません。仮名や任意の文字列を使用できます。'
+        ),
+        e('input', {
+          className: 'nickname-input',
+          type: 'text',
+          placeholder: 'ニックネームを入力（例：Taro、匿名01）',
+          maxLength: 30,
+          value: nickname,
+          onChange: ev => setNickname(ev.target.value),
+          onKeyDown: ev => { if (ev.key === 'Enter') handleNicknameSubmit(); }
+        }),
+        e('p', { className: 'nickname-hint' }, '未入力の場合は「匿名」として記録されます'),
+        e('button', {
+          className: 'btn-primary',
+          onClick: handleNicknameSubmit
+        }, '回答を始める →')
+      )
+    );
+  }
 
   if (questions.length === 0) {
     return e('div', { className: 'content' }, e('p', { className: 'loading' }, '読み込み中...'));
