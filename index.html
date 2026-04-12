@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>実験哲学プラットフォーム</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Noto+Sans+JP:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #f5f4f0;
+      --surface:        #ffffff;
+      --surface2:       #f0eeea;
+      --border:         rgba(0,0,0,0.08);
+      --border2:        rgba(0,0,0,0.14);
+      --text:           #1a1a1b;
+      --muted:          #8a8880;
+      --accent:         #9a7a3e;
+      --accent-bg:      rgba(154,122,62,0.10);
+      --accent-border:  rgba(154,122,62,0.30);
+      --info:           #3a6fb4;
+      --info-bg:        rgba(58,111,180,0.10);
+      --info-border:    rgba(58,111,180,0.30);
+      --success:        #3a8d67;
+      --danger:         #c46b6b;
+      --radius:         10px;
+      --radius-lg:      16px;
+    }
+
+    :root.dark {
+      --bg:             #0e0e0f;
+      --surface:        #17171a;
+      --surface2:       #1f1f24;
+      --border:         rgba(255,255,255,0.08);
+      --border2:        rgba(255,255,255,0.14);
+      --text:           #f0ede8;
+      --muted:          #7a7870;
+      --accent:         #c8a96e;
+      --accent-bg:      rgba(200,169,110,0.10);
+      --accent-border:  rgba(200,169,110,0.30);
+      --info:           #5b8fd4;
+      --info-bg:        rgba(91,143,212,0.10);
+      --info-border:    rgba(91,143,212,0.30);
+      --success:        #5aad87;
+      --danger:         #c46b6b;
+      --radius:         10px;
+      --radius-lg:      16px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #root { position: relative; z-index: 1; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .topbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+
+    .topbar-back {
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.15s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .topbar-back:hover { color: var(--text); }
+
+    .badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .home-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .home-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      margin-bottom: 2rem;
+    }
+
+    .home-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .home-sub {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 520px;
+      line-height: 1.8;
+      margin-bottom: 3rem;
+    }
+
+    .home-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    @media (max-width: 480px) {
+      .home-cards { grid-template-columns: 1fr; }
+    }
+
+    .entry-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-align: left;
+    }
+
+    .entry-card:hover {
+      background: var(--surface2);
+      transform: translateY(-2px);
+    }
+
+    .entry-card.player:hover       { border-color: var(--accent-border); }
+    .entry-card.experimenter:hover { border-color: var(--info-border); }
+
+    .entry-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .entry-role {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .entry-role.player       { color: var(--accent); }
+    .entry-role.experimenter { color: var(--info); }
+
+    .entry-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .entry-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .entry-arrow {
+      display: block;
+      margin-top: 18px;
+      font-size: 18px;
+      color: var(--muted);
+      transition: color 0.15s;
+    }
+
+    .entry-card:hover .entry-arrow { color: var(--text); }
+
+    .home-footer {
+      margin-top: 3rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page-inner {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .page-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .body { padding: 28px 24px; }
+
+    .section-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .progress-wrap {
+      height: 2px;
+      background: var(--border);
+      margin-bottom: 28px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .label.accent { color: var(--accent); }
+
+    .survey-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .survey-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .survey-card:hover {
+      border-color: var(--accent-border);
+      transform: translateY(-1px);
+    }
+
+    .survey-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .survey-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .survey-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .q-jp {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .opt-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 13px 16px;
+      margin-bottom: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .opt-btn:hover {
+      border-color: var(--border2);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .opt-jp {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .opt-arrow {
+      font-size: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      width: 100%;
+      padding: 14px;
+      margin-top: 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #0e0e0f;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+
+    .btn-ghost {
+      display: inline-block;
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .btn-ghost:hover { color: var(--text); }
+
+    .empty-box,
+    .loading-box,
+    .error-box,
+    .done-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .error-box {
+      color: var(--danger);
+      border-color: rgba(196,107,107,0.35);
+      background: rgba(196,107,107,0.08);
+    }
+
+    .done-box {
+      text-align: center;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { animation: fadeUp 0.3s ease forwards; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const { useState, useEffect } = React;
+const e = React.createElement;
+const API_URL = 'https://tetsugaku-platform.onrender.com/api';
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(false);
+
+  const toggle = () => {
+    setDark(!dark);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  return e('button', {
+    onClick: toggle,
+    style: {
+      position: 'fixed',
+      top: '12px',
+      right: '12px',
+      zIndex: 1000,
+      background: 'var(--surface2)',
+      border: '1px solid var(--border2)',
+      color: 'var(--text)',
+      borderRadius: '20px',
+      padding: '6px 14px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      fontFamily: "'DM Mono', monospace"
+    }
+  }, dark ? '☀️ Light' : '🌙 Dark');
+}
+
+function HomePage({ onPlayer, onExperimenter }) {
+  return e('div', { className: 'home-wrap animate' },
+    e('div', { className: 'home-logo' }, 'TETSUGAKU.ONLINE'),
+    e('h1', { className: 'home-title' }, '実験哲学プラットフォーム'),
+    e('p', { className: 'home-sub' },
+      'このページは実験表示用の共通フロントエンドです。今後は研究者が追加した実験内容をデータベースから読み込み、ここに表示します。'
+    ),
+    e('div', { className: 'home-cards' },
+      e('div', { className: 'entry-card player', onClick: onPlayer },
+        e('span', { className: 'entry-icon' }, '🧩'),
+        e('span', { className: 'entry-role player' }, 'Participant'),
+        e('div', { className: 'entry-title' }, '実験に参加する'),
+        e('p', { className: 'entry-desc' }, '公開中の実験一覧を読み込み、選択した実験に回答します。'),
+        e('span', { className: 'entry-arrow' }, '→')
+      ),
+      e('div', { className: 'entry-card experimenter', onClick: onExperimenter },
+        e('span', { className: 'entry-icon' }, '🧪'),
+        e('span', { className: 'entry-role experimenter' }, 'Researcher'),
+        e('div', { className: 'entry-title' }, '研究者向け案内'),
+        e('p', { className: 'entry-desc' }, '実験の登録と管理はバックエンド側で行い、将来ここに専用画面を追加します。'),
+        e('span', { className: 'entry-arrow' }, '→')
+      )
+    ),
+    e('p', { className: 'home-footer' }, 'Frontend Template')
+  );
+}
+
+function SurveyListPage({ surveys, loading, error, onSelect, onBack }) {
+  return e('div', { className: 'page-wrap' },
+    e('div', { className: 'page-inner' },
+      e('div', { className: 'card' },
+        e('div', { className: 'topbar' },
+          e('button', { className: 'topbar-back', onClick: onBack }, '← トップへ戻る'),
+          e('div', { className: 'topbar-title' }, '実験一覧'),
+          e('span', null)
+        ),
+        e('div', { className: 'body animate' },
+          e('div', { className: 'section-title' }, '公開中の実験'),
+          e('div', { className: 'section-sub' }, 'データベースから取得した実験を表示します。'),
+          loading && e('div', { className: 'loading-box' }, '読み込み中です。'),
+          error && e('div', { className: 'error-box' }, error),
+          !loading && !error && surveys.length === 0 && e('div', { className: 'empty-box' }, '現在、表示可能な実験はありません。'),
+          !loading && !error && surveys.length > 0 && e('div', { className: 'survey-list' },
+            surveys.map(survey =>
+              e('div', {
+                key: survey.id,
+                className: 'survey-card',
+                onClick: () => onSelect(survey)
+              },
+                e('div', { className: 'survey-title' }, survey.title || 'Untitled Survey'),
+                e('div', { className: 'survey-desc' }, survey.description || '説明はまだ登録されていません。'),
+                e('div', { className: 'survey-meta' },
+                  e('span', { className: 'meta-badge' }, `ID ${survey.id}`),
+                  survey.experiment_type && e('span', { className: 'meta-badge' }, survey.experiment_type),
+                  typeof survey.questions_per_session === 'number' && e('span', { className: 'meta-badge' }, `${survey.questions_per_session} questions`)
+                )
+              )
+            )
+          )
+        )
+      ),
+      e('p', { className: 'page-footer' }, 'Survey List View')
+    )
+  );
+}
+
+function ResearcherPlaceholderPage({ onBack }) {
+  return e('div', { className: 'page-wrap' },
+    e('div', { className: 'page-inner' },
+      e('div', { className: 'card' },
+        e('div', { className: 'topbar' },
+          e('button', { className: 'topbar-back', onClick: onBack }, '← トップへ戻る'),
+          e('div', { className: 'topbar-title' }, '研究者向け'),
+          e('span', null)
+        ),
+        e('div', { className: 'body animate' },
+          e('div', { className: 'section-title' }, '研究者向け画面は準備中です'),
+          e('div', { className: 'section-sub' },
+            '現在は Django 管理画面または API を通じて実験を管理します。将来ここに専用インターフェースを追加します。'
+          ),
+          e('button', { className: 'btn-ghost', onClick: onBack }, 'トップへ戻る')
+        )
+      ),
+      e('p', { className: 'page-footer' }, 'Researcher Placeholder')
+    )
+  );
+}
+
+function normalizeQuestion(question, index) {
+  const choiceList = Array.isArray(question.choices) ? question.choices : [];
+  return {
+    id: question.id || index + 1,
+    text: question.text || question.prompt || `Question ${index + 1}`,
+    choices: choiceList.map((choice, choiceIndex) => ({
+      id: choice.id || choiceIndex + 1,
+      text: choice.text || choice.label || `Choice ${choiceIndex + 1}`
+    }))
+  };
+}
+
+function submitAnswer(questionId, choiceId) {
+  return fetch(`${API_URL}/answers/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: questionId,
+      choice: choiceId
+    })
+  });
+}
+
+function SurveyPlayerPage({ survey, onBack }) {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [qIndex, setQIndex] = useState(0);
+  const [completed, setCompleted] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch(`${API_URL}/surveys/${survey.id}/`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (!active) return;
+
+        const rawQuestions = Array.isArray(data.questions) ? data.questions : [];
+        const normalizedQuestions = rawQuestions.map(normalizeQuestion).filter(q => q.choices.length > 0);
+
+        setQuestions(normalizedQuestions);
+        setLoading(false);
+      })
+      .catch(err => {
+        if (!active) return;
+        console.error('Survey detail error:', err);
+        setError('実験の詳細を読み込めませんでした。');
+        setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [survey.id]);
+
+  const currentQ = questions[qIndex];
+  const progress = questions.length > 0 ? ((qIndex + 1) / questions.length) * 100 : 0;
+
+  const handleChoice = (choice) => {
+    submitAnswer(currentQ.id, choice.id)
+      .catch(err => console.error('Answer submit error:', err))
+      .finally(() => {
+        if (qIndex < questions.length - 1) {
+          setQIndex(qIndex + 1);
+        } else {
+          setCompleted(true);
+        }
+      });
+  };
+
+  return e('div', { className: 'page-wrap' },
+    e('div', { className: 'page-inner' },
+      e('div', { className: 'card' },
+        e('div', { className: 'topbar' },
+          e('button', { className: 'topbar-back', onClick: onBack }, '← 実験一覧へ戻る'),
+          e('div', { className: 'topbar-title' }, survey.title || '実験'),
+          !loading && !completed && questions.length > 0
+            ? e('span', { className: 'badge' }, `Q ${qIndex + 1} / ${questions.length}`)
+            : e('span', null)
+        ),
+        e('div', { className: 'body animate' },
+          e('div', { className: 'section-title' }, survey.title || '実験'),
+          e('div', { className: 'section-sub' }, survey.description || '説明はまだ登録されていません。'),
+
+          loading && e('div', { className: 'loading-box' }, '設問を読み込み中です。'),
+          error && e('div', { className: 'error-box' }, error),
+
+          !loading && !error && questions.length === 0 && !completed && e('div', { className: 'empty-box' }, 'この実験には表示可能な設問がありません。'),
+
+          !loading && !error && questions.length > 0 && !completed && [
+            e('div', { key: 'progress-wrap', className: 'progress-wrap' },
+              e('div', { className: 'progress-bar', style: { width: `${progress}%` } })
+            ),
+            e('span', { key: 'label', className: 'label accent' }, 'Question'),
+            e('p', { key: 'question', className: 'q-jp' }, currentQ.text),
+            ...currentQ.choices.map(choice =>
+              e('button', {
+                key: choice.id,
+                className: 'opt-btn',
+                onClick: () => handleChoice(choice)
+              },
+                e('span', { className: 'opt-jp' }, choice.text),
+                e('span', { className: 'opt-arrow' }, '›')
+              )
+            )
+          ],
+
+          !loading && completed && e('div', { className: 'done-box' },
+            e('div', { className: 'section-title' }, '回答が完了しました'),
+            e('div', { className: 'section-sub' }, 'ご協力ありがとうございました。'),
+            e('button', { className: 'btn-primary', onClick: onBack }, '実験一覧へ戻る')
+          )
+        )
+      ),
+      e('p', { className: 'page-footer' }, 'Survey Player View')
+    )
+  );
+}
+
+function App() {
+  const [page, setPage] = useState('home');
+  const [surveys, setSurveys] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
+
+  const loadSurveys = () => {
+    setLoading(true);
+    setError('');
+
+    fetch(`${API_URL}/surveys/`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        const publishedSurveys = Array.isArray(data)
+          ? data.filter(item => item.is_published !== false)
+          : [];
+
+        setSurveys(publishedSurveys);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Survey list error:', err);
+        setError('実験一覧を取得できませんでした。');
+        setLoading(false);
+      });
+  };
+
+  const openPlayerHome = () => {
+    setPage('survey_list');
+    loadSurveys();
+  };
+
+  const openSurvey = (survey) => {
+    setSelectedSurvey(survey);
+    setPage('survey_player');
+  };
+
+  if (page === 'survey_list') {
+    return e(SurveyListPage, {
+      surveys,
+      loading,
+      error,
+      onSelect: openSurvey,
+      onBack: () => setPage('home')
+    });
+  }
+
+  if (page === 'survey_player' && selectedSurvey) {
+    return e(SurveyPlayerPage, {
+      survey: selectedSurvey,
+      onBack: () => setPage('survey_list')
+    });
+  }
+
+  if (page === 'researcher') {
+    return e(ResearcherPlaceholderPage, {
+      onBack: () => setPage('home')
+    });
+  }
+
+  return e(HomePage, {
+    onPlayer: openPlayerHome,
+    onExperimenter: () => setPage('researcher')
+  });
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  e(React.Fragment, null, e(ThemeToggle), e(App))
+);
+</script>
+</body>
+</html>
