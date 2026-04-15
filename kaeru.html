@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>かえる / KAERU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --color-bg:           #080808;
+      --color-surface:      #1a1916;
+      --color-surface-2:    #222018;
+      --color-text:         #e0ddd6;
+      --color-text-muted:   #6b6860;
+      --color-accent:       #5ba8b0;
+      --color-accent-dim:   #2a5a60;
+      --color-reveal:       #c9a96e;
+      --color-reveal-muted: #8c7750;
+      --color-border:       #2e2c28;
+      --color-choice-bg:    #1e1d1a;
+      --color-choice-hover: #2a2925;
+      /* 分岐テキスト色 */
+      --color-branch-mem:   #7aafc4;
+      --color-branch-cau:   #9ab584;
+      --color-branch-rel:   #c9906e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Shippori Mincho', 'MS Mincho', 'Hiragino Mincho ProN', serif;
+      font-weight: 500;
+      line-height: 2.2;
+      letter-spacing: 0.1em;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+
+    /* アンビエント背景 */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-color: var(--color-bg);
+      transition: background 2.5s ease;
+    }
+    .bg-layer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+      opacity: 0.06;
+      pointer-events: none;
+      mix-blend-mode: overlay;
+    }
+
+    .bg-swamp    { background: radial-gradient(ellipse at 50% 100%, #141c16 0%, #080808 70%); }
+    .bg-alley    { background: linear-gradient(160deg, #080808 20%, #0d1119 100%); }
+    .bg-entrance { background: radial-gradient(circle at 50% 0%, #1c2220 0%, #080808 60%); }
+    .bg-room     { background: radial-gradient(circle at 75% 35%, #221508 0%, #080808 75%); }
+    .bg-reveal   { background: radial-gradient(circle at 50% 50%, #1e0a04 0%, #000 80%); }
+    .bg-end-rain { background: linear-gradient(to bottom, #090c12 0%, #040406 100%); }
+
+    /* ヘッダー */
+    .header-logo {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      letter-spacing: 0.5em;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .header-logo.visible { opacity: 1; }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* リール（巻物）テキストエリア */
+    .text-area {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      position: relative;
+      cursor: pointer;
+    }
+    .text-area::-webkit-scrollbar { display: none; }
+
+    .text-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 45vh;
+      padding-bottom: 45vh;
+      gap: 36px;
+      max-width: 700px;
+      margin: 0 auto;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    /* 通常行 */
+    .reel-line {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      opacity: 0.25;
+      filter: blur(1.5px);
+      text-align: center;
+      transform: scale(0.88);
+      transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+      max-width: 90%;
+      pointer-events: none;
+      line-height: 2.0;
+    }
+    .reel-line.active {
+      font-size: 22px;
+      color: var(--color-text);
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+      font-weight: 600;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.9);
+    }
+
+    /* リビール行 */
+    .reel-line.reveal { color: var(--color-reveal-muted); }
+    .reel-line.reveal.active {
+      color: var(--color-reveal);
+      font-size: 24px;
+      text-shadow: 0 0 20px rgba(201, 169, 110, 0.25);
+    }
+
+    /* ★ 分岐内省テキスト行 */
+    .reel-line.branch {
+      font-size: 13px;
+      font-style: italic;
+      opacity: 0.15;
+      filter: blur(1px);
+      transform: scale(0.85);
+      max-width: 80%;
+    }
+    .reel-line.branch.active {
+      font-size: 15px;
+      opacity: 0.75;
+      filter: blur(0);
+      transform: scale(1);
+      font-weight: 400;
+      text-shadow: none;
+    }
+    .reel-line.branch-mem.active { color: var(--color-branch-mem); }
+    .reel-line.branch-cau.active { color: var(--color-branch-cau); }
+    .reel-line.branch-rel.active { color: var(--color-branch-rel); }
+
+    /* タップ誘導 */
+    .next-indicator {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--color-accent);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.15em;
+      z-index: 20;
+    }
+    .next-indicator.visible { opacity: 0.7; animation: pulse 2s infinite; }
+    .next-indicator::after { content: '▼'; font-size: 9px; margin-top: 2px; }
+
+    /* 選択肢エリア */
+    .choices-area {
+      position: absolute;
+      bottom: 52px;
+      right: 48px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 14px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .choice-btn {
+      width: 100%;
+      background: rgba(14, 13, 11, 0.75);
+      backdrop-filter: blur(10px);
+      color: var(--color-text);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.6;
+      letter-spacing: 0.08em;
+      padding: 15px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+    }
+    .choice-btn.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .choice-btn:hover {
+      background: rgba(30, 28, 24, 0.9);
+      border-color: var(--color-accent-dim);
+      box-shadow: 0 0 22px rgba(91, 168, 176, 0.2);
+      color: #fff;
+    }
+    .choice-btn:active { transform: translateY(2px); }
+
+    @media (max-width: 600px) {
+      .choices-area { left: 20px; right: 20px; width: auto; bottom: 52px; }
+      .text-content { gap: 28px; }
+    }
+
+    /* 暗転 */
+    .blackout-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #000;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1200ms ease;
+    }
+
+    /* タイトル画面 */
+    .title-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-bg);
+      z-index: 50;
+      transition: opacity 1000ms ease;
+    }
+    .title-kanji {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.9);
+    }
+    .title-sub {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      letter-spacing: 0.35em;
+      margin-bottom: 64px;
+      font-family: sans-serif;
+      font-weight: 400;
+    }
+    .start-btn {
+      background: transparent;
+      color: var(--color-text);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 13px 44px;
+      font-family: inherit;
+      font-size: 16px;
+      letter-spacing: 0.25em;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 350ms ease;
+    }
+    .start-btn:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.4);
+      box-shadow: 0 0 28px rgba(224, 221, 214, 0.08);
+    }
+
+    /* プロファイルUI */
+    .profile-ui {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 36px 32px;
+      background: rgba(10, 9, 8, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
+    .profile-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-reveal);
+      text-align: center;
+      letter-spacing: 0.25em;
+      margin-bottom: 4px;
+    }
+    .profile-row { display: flex; flex-direction: column; gap: 8px; }
+    .profile-label { font-size: 13px; color: var(--color-text-muted); letter-spacing: 0.1em; }
+    .progress-track {
+      width: 100%; height: 4px;
+      background-color: rgba(255,255,255,0.05);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fill-mem { background-color: var(--color-branch-mem); }
+    .fill-cau { background-color: var(--color-branch-cau); }
+    .fill-rel { background-color: var(--color-branch-rel); }
+
+    .profile-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin: 4px 0;
+    }
+    .profile-path {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      text-align: center;
+      letter-spacing: 0.06em;
+      line-height: 1.8;
+      opacity: 0.7;
+    }
+    .profile-msg {
+      font-size: 15px;
+      text-align: center;
+      color: var(--color-text);
+      line-height: 2.0;
+      font-weight: 500;
+      padding-top: 4px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-layer bg-swamp" id="bgLayer"></div>
+  <div class="blackout-overlay" id="blackout"></div>
+  <div class="header-logo" id="headerLogo">かえる</div>
+
+  <div class="title-screen" id="titleScreen">
+    <div class="title-kanji">かえる</div>
+    <div class="title-sub">KAERU / Swampman Awakens</div>
+    <button class="start-btn" id="startBtn">はじめる</button>
+  </div>
+
+  <div class="container" id="gameContainer" style="display: none;">
+    <div class="text-area" id="textArea">
+      <div class="text-content" id="textContent"></div>
+    </div>
+    <div class="next-indicator" id="nextIndicator">画面をタップして進む</div>
+    <div class="choices-area" id="choicesBox"></div>
+  </div>
+
+  <script>
+    /* ========================================================
+       ゲーム状態
+    ======================================================== */
+    const gameState = {
+      profile: { A_mem:0, A_cau:0, B_act:0, B_inv:0, C_rel:0, C_self:0 },
+      path: [],
+      revealVariant: '',
+      ending: ''
+    };
+
+    function recordChoice(axis, pole) {
+      gameState.profile[`${axis}_${pole}`]++;
+      gameState.path.push(`${axis}:${pole}`);
+    }
+
+    function determineReveal() {
+      const p = gameState.profile;
+      const scores = { memory: p.A_mem, causal: p.A_cau, relationship: p.C_rel };
+      const max = Math.max(...Object.values(scores));
+      const winners = Object.keys(scores).filter(k => scores[k] === max);
+      return winners.length === 1 ? winners[0] : 'default';
+    }
+
+    function resetGame() {
+      gameState.profile = { A_mem:0, A_cau:0, B_act:0, B_inv:0, C_rel:0, C_self:0 };
+      gameState.path = [];
+      gameState.revealVariant = '';
+      gameState.ending = '';
+    }
+
+    /* ========================================================
+       オーディオ
+    ======================================================== */
+    let audioCtx = null;
+
+    function initAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch(e) {}
+    }
+
+    function playTextSound() {
+      try {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+      } catch(e) {}
+    }
+
+    function playClickSound() {
+      try {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+      } catch(e) {}
+    }
+
+    function playRevealSound() {
+      try {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(55, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+      } catch(e) {}
+    }
+
+    /* ========================================================
+       ★ 分岐内省テキスト
+       プロファイルの蓄積に応じて、特定シーンに内省行を挿入する
+    ======================================================== */
+    function getBranchInsert(sceneKey) {
+      const p = gameState.profile;
+      const memLead = p.A_mem > p.A_cau && p.A_mem > p.C_rel;
+      const cauLead = p.A_cau > p.A_mem && p.A_cau > p.C_rel;
+      const relLead = p.C_rel > p.A_mem && p.C_rel > p.A_cau;
+
+      // シーン × 軸 → 内省テキストと挿入位置（行インデックスの後）
+      const table = {
+        s3: {
+          // 犬ムギに会う前の内面——最初の選択の残響
+          mem: { after: 0, cls: 'branch-mem', text: '——メッセージの文字が、まだ頭の中で光っていた。' },
+          cau: { after: 0, cls: 'branch-cau', text: '——泥の上の二つの痕跡が、まだ目の裏にあった。' },
+          rel: null
+        },
+        s4: {
+          // エントランスに着いた瞬間——鍵が合う前後
+          mem: { after: 1, cls: 'branch-mem', text: '——自分がいつもどのポケットに鍵を入れるか、知っていた。' },
+          cau: { after: 1, cls: 'branch-cau', text: '——合っている。なぜ、合っているのか。' },
+          rel: { after: 0, cls: 'branch-rel', text: '——4階の窓の明かりを、少し長く見ていた。' }
+        },
+        s5: {
+          // 「かえり方が違う」——最も重要な一行の直後
+          mem: { after: 4, cls: 'branch-mem', text: '——いつも、どう帰っていたのか。自分は、知っていた。知っているはずだ。' },
+          cau: { after: 4, cls: 'branch-cau', text: '——ムギも、気づいていた。鏡の顔も、おかしかった。蓮も、気づいている。' },
+          rel: { after: 4, cls: 'branch-rel', text: '——蓮の声だった。眠そうで、でも確かに、そこにいる声だった。' }
+        },
+        s6b_room: {
+          // 蓮の顔を見ている——関係軸が高いルートのみ
+          rel: { after: 0, cls: 'branch-rel', text: '——この人のために、帰ってきた。それは本当のことだと思った。' },
+          mem: null,
+          cau: null
+        },
+        s7: {
+          // ニュース速報——全軸で違う受け取り方
+          mem: { after: 1, cls: 'branch-mem', text: '——身元確認中。その四文字が、白く見えた。' },
+          cau: { after: 1, cls: 'branch-cau', text: '——湿地帯。落雷。0時17分。全部、知っていた。ただ、認めたくなかった。' },
+          rel: { after: 1, cls: 'branch-rel', text: '——蓮の寝息が聞こえた。画面を伏せた。それで十分だと思いたかった。' }
+        }
+      };
+
+      const scene = table[sceneKey];
+      if (!scene) return null;
+      if (memLead && scene.mem) return scene.mem;
+      if (cauLead && scene.cau) return scene.cau;
+      if (relLead && scene.rel) return scene.rel;
+      return null;
+    }
+
+    /* ========================================================
+       シーンデータ
+    ======================================================== */
+    const scenes = {
+      s0: {
+        theme: 'bg-swamp',
+        lines: [
+          "最初に感じたのは、泥だった。",
+          "冷たい。深い。引き留めるような泥。",
+          "体を起こす。コートはずぶ濡れだ。<br>暴風雨は遠ざかっている。",
+          "代わりに——近くで、何かが鳴いている。",
+          "——かえる、だ。",
+          "ポケットの中でスマホが光っている。<br>画面が割れている。でも、まだついている。",
+          "蓮からの未読メッセージ、1件。"
+        ],
+        choices: [{ label: "次へ進む", next: "s1" }]
+      },
+      s1: {
+        theme: 'bg-swamp',
+        lines: ["スマホの光が、泥の上を照らしている。"],
+        choices: [
+          { label: "メッセージを読む", action: () => recordChoice('A', 'mem'), next: "s2a" },
+          { label: "自分がどこにいるか確認する", action: () => recordChoice('A', 'cau'), next: "s2b" }
+        ]
+      },
+      s2a: {
+        theme: 'bg-swamp',
+        lines: [
+          "「どこにいんの。カップ麺、お前の机に置いといたから。」",
+          "——蓮",
+          "送信時刻：23:44。今は、翌0時17分。",
+          "家を出たときのことは覚えている。<br>蓮が「傘持った？」と言ったことも。",
+          "その間に何があったか——覚えていない。"
+        ],
+        choices: [
+          { label: "「今から帰る」と返信する", action: () => recordChoice('B', 'act'), next: "s3" },
+          { label: "返信せず、何があったか思い出す", action: () => recordChoice('B', 'inv'), next: "s3" }
+        ]
+      },
+      s2b: {
+        theme: 'bg-swamp',
+        lines: [
+          "懐中電灯で地面を照らす。<br>泥の上に、二つの痕跡。",
+          "一つは、今自分が立ち上がった跡。",
+          "もう一つは——もっと深く、もっと古い。<br>人が、倒れた形。",
+          "全く同じ、形。",
+          "どのくらいそれを見ていたか、わからない。"
+        ],
+        choices: [
+          { label: "スマホで写真を撮っておく", action: () => recordChoice('B', 'inv'), next: "s3" },
+          { label: "立ち上がって、歩き出す", action: () => recordChoice('B', 'act'), next: "s3" }
+        ]
+      },
+
+      // ★ s3：犬ムギ——分岐内省あり
+      s3: {
+        theme: 'bg-alley',
+        branchKey: 's3',
+        lines: [
+          "路地を歩いていると、犬が一匹、こちらを見た。<br>首輪に名前が書いてある。「ムギ」。",
+          "——覚えている。この犬、知っている。",
+          "でも、なぜ知っているのか、わからない。",
+          "ムギは吠えなかった。ただ、見ていた。"
+        ],
+        choices: [
+          { label: "しゃがんで手を差し出す", action: () => recordChoice('C', 'rel'), next: "s3_add" },
+          { label: "そのまま歩き続ける", action: () => recordChoice('C', 'self'), next: "s4" }
+        ]
+      },
+      s3_add: {
+        theme: 'bg-alley',
+        lines: [
+          "ムギは鼻先をこちらに近づけた。<br>においを嗅いだ。",
+          "それから——引いた。",
+          "吠えもせず。ただ、引いた。"
+        ],
+        choices: [{ label: "立ち上がる", next: "s4" }]
+      },
+
+      // ★ s4：エントランス——分岐内省あり
+      s4: {
+        theme: 'bg-entrance',
+        branchKey: 's4',
+        lines: [
+          "マンションのエントランス。<br>4階の窓に、明かりがついている。",
+          "コートから鍵を出す。合っている。"
+        ],
+        choices: [
+          { label: "そのまま入る", action: () => recordChoice('C', 'rel'), next: "s5" },
+          { label: "鏡で自分の顔を確認する", action: () => recordChoice('A', 'cau'), next: "s4_add" }
+        ]
+      },
+      s4_add: {
+        theme: 'bg-entrance',
+        lines: [
+          "鏡の中に、自分がいる。知っている顔だ。",
+          "でも——その顔がこちらを見返している感じが、<br>どこか、おかしい。",
+          "気のせいだ、と思った。<br>気のせいにした。"
+        ],
+        choices: [{ label: "中へ入る", next: "s5" }]
+      },
+
+      // ★ s5：蓮の部屋——「かえり方が違う」直後に分岐内省
+      s5: {
+        theme: 'bg-room',
+        branchKey: 's5',
+        lines: [
+          "蓮は床に座って、ノートパソコンを開いたまま、眠っていた。",
+          "机の上に、カップ麺が一つ。湯気はもう出ていない。",
+          "部屋の壁には、付箋が貼ってある。<br>手書きの文字で：「帰ってきたら起こして」",
+          "蓮が目を開けた。こちらを見た。一秒、沈黙した。",
+          "「なんか、かえり方が違う。」",
+          "また目を閉じた。大した話ではないように。"
+        ],
+        choices: [{ label: "部屋を見回す", next: "s6" }]
+      },
+      s6: {
+        theme: 'bg-room',
+        lines: [
+          "蓮の寝息が聞こえる。",
+          "部屋を見回す。自分の机。自分の棚。<br>見覚えのある全てのもの。"
+        ],
+        choices: [
+          { label: "棚から本を手に取る", action: () => recordChoice('A', 'mem'), next: "s6_add" },
+          { label: "蓮の顔をしばらく見ている", action: () => recordChoice('C', 'rel'), next: "s6b" }
+        ]
+      },
+      s6_add: {
+        theme: 'bg-room',
+        lines: [
+          "本のページを開く。<br>折り目がついているページがある。",
+          "自分がつけた折り目だ。",
+          "それは確かだ。——確かなはずだ。",
+          "でも、最後にこのページを読んだときのことが、<br>どうしても思い出せない。"
+        ],
+        choices: [{ label: "本を戻す", next: "s7" }]
+      },
+      // ★ s6b：蓮を見ている——関係軸ルートの拡張シーン
+      s6b: {
+        theme: 'bg-room',
+        branchKey: 's6b_room',
+        lines: [
+          "蓮は、眠っている。",
+          "寝息のリズムが、穏やかだ。",
+          "この人は、自分が帰ってくることを<br>信じて、待っていた。"
+        ],
+        choices: [{ label: "視線をはずす", next: "s7" }]
+      },
+
+      // ★ s7：ニュース速報——分岐内省あり
+      s7: {
+        theme: 'bg-room',
+        branchKey: 's7',
+        lines: [
+          "スマホが震えた。ニュース速報：",
+          "【速報】市内湿地帯で20代とみられる男性が<br>死亡しているのが発見された。身元確認中。",
+          "画面を、伏せた。",
+          "カップ麺が、そこにある。"
+        ],
+        choices: [{ label: "カップ麺を見る", next: "s8" }]
+      },
+      s8: {
+        theme: 'bg-room',
+        lines: [
+          "冷めたカップ麺。蓮が、自分のために用意した。",
+          "湯気はもう出ていない。"
+        ],
+        choices: [
+          { label: "食べる", action: () => recordChoice('C', 'rel'), next: "s8_add_a" },
+          { label: "食べない", action: () => recordChoice('A', 'cau'), next: "s8_add_b" }
+        ]
+      },
+      s8_add_a: {
+        theme: 'bg-room',
+        lines: [
+          "冷たかった。",
+          "でも、食べた。",
+          "蓮が作った温度が、もう残っていなくても。"
+        ],
+        choices: [{ label: "……", next: "reveal_init" }]
+      },
+      s8_add_b: {
+        theme: 'bg-room',
+        lines: [
+          "手をつけなかった。",
+          "蓮が用意したものだから——<br>それとも、食べる資格があるかどうか、わからなかったから。",
+          "どちらか、自分にもわからなかった。"
+        ],
+        choices: [{ label: "……", next: "reveal_init" }]
+      },
+
+      // ★ end_choice：哲学的な問いで締める
+      end_choice: {
+        theme: 'bg-reveal',
+        lines: [
+          "蓮は、眠っている。",
+          "カップ麺は、冷めている。",
+          "——あなたは、誰ですか。"
+        ],
+        choices: [
+          { label: "帰ってきた。それだけで十分だ。", next: "e1" },
+          { label: "帰れない。あの人は、もう帰れない。", next: "e2" },
+          { label: "わからない。でも、冷めた麺は食べられる。", next: "e3" }
+        ]
+      },
+
+      e1: {
+        theme: 'bg-room',
+        lines: [
+          "スマホの速報を、消した。",
+          "蓮の肩に、毛布をかけた。",
+          "知っていた場所に。知っていた角度で。",
+          "——その動作が、自然だった。",
+          "窓の外で、雨が続いている。<br>カエルが、鳴いている。",
+          "終"
+        ],
+        isEnding: true
+      },
+      e2: {
+        theme: 'bg-end-rain',
+        lines: [
+          "鍵を、机の上に置いた。<br>音を立てないように。",
+          "ドアを開けた。エントランスを出た。",
+          "傘を、持たなかった。",
+          "雨の中を、歩いた。どこへ、ではなく。",
+          "——ただ、あの人の代わりに、歩いた。",
+          "終"
+        ],
+        isEnding: true
+      },
+      e3: {
+        theme: 'bg-room',
+        lines: [
+          "椅子を引いて、座った。",
+          "箸を取った。食べた。ぬるかった。",
+          "蓮の寝息が聞こえる。<br>雨が聞こえる。カエルが聞こえる。",
+          "それだけが、確かだった。",
+          "——それで十分かどうかは、わからない。<br>でも、それだけが、今ここにあった。",
+          "終"
+        ],
+        isEnding: true
+      }
+    };
+
+    /* ========================================================
+       リビールシーン生成
+    ======================================================== */
+    function generateRevealScene() {
+      const variant = determineReveal();
+      const lines = [
+        "0時17分。湿地帯。落雷。",
+        "一人の人間が、倒れた。",
+        "そして——泥の中から、もう一人が、立ち上がった。",
+        "全く同じ記憶。<br>全く同じ愛着。<br>全く同じ鍵。",
+        "その人間は、帰ってきた。",
+        "カップ麺を受け取った。<br>「かえり方が違う」と言われた。"
+      ];
+
+      if (variant === 'memory') {
+        lines.push(
+          "お前はずっと、記憶を信じて動いていた。",
+          "メッセージを読んだ。<br>道を知っていた。<br>本の折り目を覚えていた。",
+          "その記憶は、全部本物だ。",
+          "ただ——お前のものじゃない。"
+        );
+      } else if (variant === 'causal') {
+        lines.push(
+          "お前はずっと、何かがおかしいと思っていた。",
+          "足跡を見た。<br>鏡を確認した。<br>カップ麺に手をつけなかった。",
+          "正しかった。何かが、おかしかった。",
+          "だから——お前は、誰だ。"
+        );
+      } else if (variant === 'relationship') {
+        lines.push(
+          "お前は、蓮のために帰ってきた。",
+          "犬に手を差し出した。<br>カップ麺を食べた。",
+          "その温かさは、本物だった。",
+          "ただ——その温かさを受け取る資格が、お前にあるのか。"
+        );
+      } else {
+        lines.push(
+          "お前は、選んだ。何度も、選んだ。",
+          "その選択は——誰のものだったのか。"
+        );
+      }
+
+      lines.push(
+        "ムギが引いたのは、においが違ったからだ。",
+        "「かえり方が違う」は、そういう意味だ。",
+        "——蓮は、まだ眠っている。",
+        "——それが、お前だ。"
+      );
+
+      return {
+        theme: 'bg-reveal',
+        isReveal: true,
+        lines: lines,
+        choices: [{ label: "次へ", next: "end_choice" }]
+      };
+    }
+
+    /* ========================================================
+       リールエンジン
+    ======================================================== */
+    const bgLayer    = document.getElementById('bgLayer');
+    const textArea   = document.getElementById('textArea');
+    const textContent = document.getElementById('textContent');
+    const choicesBox = document.getElementById('choicesBox');
+    const nextIndicator = document.getElementById('nextIndicator');
+    const blackoutEl = document.getElementById('blackout');
+
+    let currentSceneData = null;
+    let currentLineIndex  = 0;
+    let state = 'IDLE';
+
+    // 分岐挿入済み行の記録（scene lines 配列上のindex → 挿入済みフラグ）
+    let branchDoneFor = null;
+
+    async function showScene(sceneId) {
+      if (sceneId === 'reveal_init') {
+        state = 'IDLE';
+        nextIndicator.classList.remove('visible');
+        choicesBox.innerHTML = '';
+        choicesBox.style.pointerEvents = 'none';
+
+        blackoutEl.style.opacity = 1;
+        await wait(2000);
+
+        playRevealSound();
+        textContent.innerHTML = '';
+        scenes['reveal'] = generateRevealScene();
+        bgLayer.className = 'bg-layer ' + scenes['reveal'].theme;
+
+        blackoutEl.style.opacity = 0;
+        await wait(1000);
+
+        _startScene('reveal');
+        return;
+      }
+
+      _startScene(sceneId);
+    }
+
+    function _startScene(sceneId) {
+      currentSceneData  = scenes[sceneId];
+      currentLineIndex  = 0;
+      branchDoneFor     = null;
+
+      if (currentSceneData.theme) {
+        bgLayer.className = 'bg-layer ' + currentSceneData.theme;
+      }
+
+      textContent.innerHTML = '';
+      choicesBox.innerHTML  = '';
+      choicesBox.style.pointerEvents = 'none';
+      nextIndicator.classList.remove('visible');
+
+      state = 'WAITING_CLICK';
+      advanceReel();
+    }
+
+    function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function advanceReel() {
+      if (state !== 'WAITING_CLICK') return;
+
+      if (currentLineIndex < currentSceneData.lines.length) {
+        // 既存のactiveを非アクティブへ
+        document.querySelectorAll('.reel-line.active').forEach(el => el.classList.remove('active'));
+
+        // ★ 分岐内省テキストの挿入（指定インデックスの直前）
+        if (currentSceneData.branchKey && branchDoneFor !== currentSceneData.branchKey) {
+          const insert = getBranchInsert(currentSceneData.branchKey);
+          if (insert && insert.after === currentLineIndex) {
+            insertBranchLine(insert);
+            branchDoneFor = currentSceneData.branchKey;
+            // 分岐行はカウントしない（本筋の進行はそのまま）
+          }
+        }
+
+        const text = currentSceneData.lines[currentLineIndex];
+        const p = document.createElement('div');
+        p.className = 'reel-line active';
+        if (currentSceneData.isReveal) p.classList.add('reveal');
+        p.innerHTML = text;
+
+        textContent.appendChild(p);
+        p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        playTextSound();
+
+        currentLineIndex++;
+
+        if (currentLineIndex >= currentSceneData.lines.length) {
+          if (currentSceneData.isEnding) {
+            state = 'ENDED';
+            nextIndicator.classList.remove('visible');
+            setTimeout(showProfileUI, 1800);
+          } else if (currentSceneData.choices) {
+            state = 'WAITING_CHOICE';
+            nextIndicator.classList.remove('visible');
+            showChoices(currentSceneData.choices);
+          }
+        } else {
+          nextIndicator.classList.add('visible');
+        }
+      }
+    }
+
+    // 分岐行をDOMに追加（非アクティブ状態で追加し、次クリックでactiveになる）
+    function insertBranchLine(insert) {
+      document.querySelectorAll('.reel-line.active').forEach(el => el.classList.remove('active'));
+      const bp = document.createElement('div');
+      bp.className = `reel-line branch ${insert.cls} active`;
+      bp.textContent = insert.text;
+      textContent.appendChild(bp);
+      bp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    textArea.addEventListener('click', () => {
+      if (state === 'WAITING_CLICK') advanceReel();
+    });
+
+    async function showChoices(choices) {
+      choicesBox.innerHTML = '';
+      await wait(400);
+      choicesBox.style.pointerEvents = 'auto';
+
+      choices.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = c.label;
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          playClickSound();
+          if (c.action) c.action();
+          state = 'IDLE';
+          choicesBox.style.pointerEvents = 'none';
+          showScene(c.next);
+        };
+        choicesBox.appendChild(btn);
+        setTimeout(() => btn.classList.add('visible'), i * 160);
+      });
+    }
+
+    /* ========================================================
+       プロファイルUI
+    ======================================================== */
+    function showProfileUI() {
+      const p = gameState.profile;
+      const mem_pct = Math.min((p.A_mem / 4) * 100, 100);
+      const cau_pct = Math.min((p.A_cau / 4) * 100, 100);
+      const rel_pct = Math.min((p.C_rel / 4) * 100, 100);
+
+      const pathLabels = {
+        'A:mem':'記憶','A:cau':'因果',
+        'B:act':'行動','B:inv':'調査',
+        'C:rel':'関係','C:self':'孤独'
+      };
+      const pathText = gameState.path.map(k => pathLabels[k] || k).join('　→　');
+
+      document.querySelectorAll('.reel-line.active').forEach(el => el.classList.remove('active'));
+
+      const wrap = document.createElement('div');
+      wrap.className = 'reel-line active';
+      wrap.innerHTML = `
+        <div class="profile-ui">
+          <div class="profile-title">【今回のプロファイル】</div>
+          <div class="profile-row">
+            <div class="profile-label">記憶への信頼</div>
+            <div class="progress-track"><div class="progress-fill fill-mem" style="width:0%"></div></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">因果の追跡</div>
+            <div class="progress-track"><div class="progress-fill fill-cau" style="width:0%"></div></div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-label">関係性の重視</div>
+            <div class="progress-track"><div class="progress-fill fill-rel" style="width:0%"></div></div>
+          </div>
+          <hr class="profile-divider">
+          <div class="profile-path">選択の軌跡：${pathText}</div>
+          <div class="profile-msg">あなたは自分が何者であるか、<br>本当に知っていますか？<br>——もう一度、確かめてみますか。</div>
+        </div>
+      `;
+
+      textContent.appendChild(wrap);
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      playRevealSound();
+
+      // アニメーション付きでバーを伸ばす
+      setTimeout(() => {
+        wrap.querySelector('.fill-mem').style.width = mem_pct + '%';
+        wrap.querySelector('.fill-cau').style.width = cau_pct + '%';
+        wrap.querySelector('.fill-rel').style.width = rel_pct + '%';
+      }, 300);
+
+      setTimeout(() => {
+        choicesBox.innerHTML = '';
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn visible';
+        btn.textContent = 'もう一度プレイする';
+        btn.style.pointerEvents = 'auto';
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          playClickSound();
+          resetGame();
+          showScene('s0');
+        };
+        choicesBox.appendChild(btn);
+        choicesBox.style.pointerEvents = 'auto';
+      }, 1600);
+    }
+
+    /* ========================================================
+       初期化
+    ======================================================== */
+    document.getElementById('startBtn').addEventListener('click', () => {
+      initAudio();
+      playClickSound();
+      document.getElementById('titleScreen').style.opacity = 0;
+      setTimeout(() => {
+        document.getElementById('titleScreen').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'flex';
+        document.getElementById('headerLogo').classList.add('visible');
+        showScene('s0');
+      }, 1000);
+    });
+
+  </script>
+</body>
+</html>
