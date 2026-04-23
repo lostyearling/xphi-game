@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>過去の出来事と正義についてのアンケート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a clean, flat interface */
+        body {
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            color: #1f2937; /* Tailwind gray-800 */
+            font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .step {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Flat Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2563eb; /* blue-600 */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e5e7eb; /* gray-200 */
+            border-radius: 4px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Likert Scale Radio Buttons */
+        .likert-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        .likert-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+        .likert-item input[type="radio"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-bottom: 0.5rem;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+        .likert-label {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Progress Bar -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-xl font-semibold text-gray-800">過去の出来事と正義に関する調査</h1>
+                <span id="progress-text" class="text-sm font-medium text-gray-500">ステップ 1 / 7</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 14%;"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-3xl w-full mx-auto p-6">
+        
+        <!-- ================= STEP 1: Introduction & Base Scenario ================= -->
+        <div id="step-1" class="step active bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第1部: はじめに</h2>
+            <p class="mb-4 text-gray-700 leading-relaxed">
+                今回は調査にご協力いただき、本当にありがとうございます！私たちは、人々が過去の犯罪や正義についてどう感じているかを研究しています。これから、ある実在の状況を基にした短いストーリーを読んでいただき、それについていくつか質問にお答えいただきます。ストーリーの細かい部分についても質問するので、少し注意して読んでみてくださいね。アンケート全体で大体10〜12分くらいかかります。回答は完全に匿名で処理されます。また、このアンケートに「正解」や「間違い」はありません。あなたの率直な意見を聞かせてください。
+            </p>
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 text-sm text-amber-800 rounded-r-md">
+                <strong>内容に関する注意:</strong> このアンケートには、架空の金融犯罪や被害者への影響に関するシナリオが含まれています。もし読んでいてつらくなったりした場合は、いつでもブラウザを閉じてアンケートをやめていただいて構いません。その場合でもペナルティは一切ありませんし、そこまで費やしていただいた時間に対する報酬はお支払いします。
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">基本のストーリー</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8 text-gray-800 text-lg leading-relaxed shadow-inner">
+                今から20年前のことです。当時25歳だったマイケル・ダルトンは、地域の小さな投資ファンドのマネージャーをしていました。彼は2年間にわたり、そのファンドから14万ドル（約2000万円）を計画的に盗み出しました。そのお金は、地域の高齢の退職者たちが彼を信じて預けたものでした。この結果、数名のお年寄りが深刻な経済的苦境に陥ってしまいました。しかし、マイケルが捕まったり起訴されたりすることはありませんでした。彼は現在、45歳になっています。
+            </div>
+
+            <div class="flex justify-end mt-8">
+                <button onclick="nextStep(1, 2)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 2: The Continuation (Dynamic Condition) ================= -->
+        <div id="step-2" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">ストーリーの続き...</h2>
+            <p class="mb-4 text-gray-600">現在のマイケルがどうしているか、以下のアップデートを読んでみてください。</p>
+            
+            <div id="condition-container" class="bg-blue-50 p-6 rounded-lg border border-blue-100 mb-8 text-gray-800 text-lg leading-relaxed shadow-inner">
+                <!-- Content injected via JavaScript based on random assignment -->
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(2, 1)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="nextStep(2, 3)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 3: Manipulation & Comprehension Checks ================= -->
+        <div id="step-3" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第3部: 内容の確認</h2>
+            
+            <!-- Check 1 -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    1. 今読んだストーリーから見て、現在のマイケルは、20年前に横領をしたマイケルと心理的にどのくらい似ていると思いますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="check1" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">心理的に全くの別人</span></span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="4"><span class="likert-label">4<br/><span class="text-xs text-gray-500">ある程度似ている</span></span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="check1" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">心理的に全く同じ人物</span></span></div>
+                </div>
+            </div>
+
+            <!-- Check 2 -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    2. 今読んだストーリーから見て、横領事件の時からマイケルの「<strong id="dynamic-dimension-text" class="text-blue-700 bg-blue-50 px-1 rounded"></strong>」はどのくらい変化したと思いますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="check2" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">全く変わっていない（完全に同じ）</span></span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="4"><span class="likert-label">4<br/><span class="text-xs text-gray-500">ある程度変わった</span></span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="check2" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">完全に変わった</span></span></div>
+                </div>
+            </div>
+
+            <!-- Check 3 -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    3. ストーリーによると、マイケルは20年前に何をしましたか？
+                </label>
+                <div class="space-y-3 pl-2">
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check3" value="A" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">A) 高齢の退職者たちのものだった地域の投資ファンドからお金を盗んだ</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check3" value="B" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">B) 同僚に暴力を振るった</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check3" value="C" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">C) 金融詐欺の濡れ衣を着せられたが、実は無実だった</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check3" value="D" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">D) 上記のどれでもない</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Check 4 -->
+            <div class="mb-6">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    4. ストーリーによると、横領の時からマイケルのどの部分が最も変化しましたか？
+                </label>
+                <div class="space-y-3 pl-2">
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check4" value="A" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">A) 彼の道徳的な価値観や倫理的な考え方</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check4" value="B" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">B) 当時の人生についての記憶</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check4" value="C" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">C) 彼のキャリア、日常生活、長期的な目標</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer group">
+                        <input type="radio" name="check4" value="D" class="mt-1 mr-3 w-5 h-5 accent-blue-600">
+                        <span class="text-gray-700 group-hover:text-black">D) 何も変わっていない — 彼は基本的に昔のままだ</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(3, 2)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="nextStep(3, 4)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 4: Dependent Measures (Part 1) ================= -->
+        <div id="step-4" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第4部: あなたの意見（1ページ目）</h2>
+            
+            <!-- 1. Explicit Blame Rating -->
+            <div class="mb-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block text-lg font-medium text-gray-800 mb-6">
+                    1. 現在のマイケルは、20年前にしたことに対して、どの程度非難されるべきだと思いますか？
+                </label>
+                <div class="px-2">
+                    <input type="range" id="blame-slider" min="0" max="10" step="1" value="5" oninput="document.getElementById('blame-val').innerText = this.value">
+                    <div class="flex justify-between text-sm text-gray-500 mt-2 font-medium">
+                        <span>0 - 全く非難されるべきではない</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">値: <span id="blame-val">5</span></span>
+                        <span>10 - 可能な限り最大限非難されるべき</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Punishment Allocation — Community Service Hours -->
+            <div class="mb-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block text-lg font-medium text-gray-800 mb-2">
+                    2. あなたが、マイケルの事件を裁く裁判官の「アドバイザー」になったと想像してみてください。
+                </label>
+                <p class="text-gray-600 mb-6 text-sm">裁判官はマイケルに0〜500時間の社会奉仕活動を命じることができます。あなたが読んだストーリーを踏まえて、何時間の社会奉仕活動を勧めますか？（正解はありませんので、あなたの率直なおすすめを教えてください）。</p>
+                <div class="px-2">
+                    <input type="range" id="cs-slider" min="0" max="500" step="10" value="250" oninput="document.getElementById('cs-val').innerText = this.value + ' 時間'">
+                    <div class="flex justify-between text-sm text-gray-500 mt-2 font-medium">
+                        <span>0 時間</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">推奨: <span id="cs-val">250 時間</span></span>
+                        <span>500 時間</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Punishment Allocation — Monetary Restitution -->
+            <div class="mb-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block text-lg font-medium text-gray-800 mb-2">
+                    3. 裁判官は、マイケルに被害者へのお金を返還させることも検討しています。
+                </label>
+                <p class="text-gray-600 mb-6 text-sm">当初盗まれた金額は14万ドルでした。現在、マイケルには支払い能力があるとして、元の金額の何パーセントを返金させるべきだと思いますか？ もし追加の罰則として元本以上を支払うべきだと感じるなら、最大150%まで設定できます。</p>
+                <div class="px-2">
+                    <input type="range" id="money-slider" min="0" max="150" step="5" value="75" oninput="updateMoneyText(this.value)">
+                    <div class="flex justify-between text-sm text-gray-500 mt-2 font-medium">
+                        <span>0% (全く返金しない)</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full"><span id="money-pct">75</span>% (<span id="money-dollar">105,000ドル</span>)</span>
+                        <span>150% (210,000ドル)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(4, 3)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="nextStep(4, 5)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 5: Dependent Measures (Part 2) ================= -->
+        <div id="step-5" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第4部: あなたの意見（2ページ目）</h2>
+            
+            <!-- 4. Identity Continuity Judgment -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    4. あなたの考えでは、現在のマイケルは、20年前に横領をしたマイケルと「同じ人物」だと思いますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="dm4" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">絶対に同じ人物ではない</span></span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="4"><span class="likert-label">4</span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="dm4" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">間違いなく同じ人物である</span></span></div>
+                </div>
+            </div>
+
+            <!-- 5. Narrative Integration Probe -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    5. 現在のマイケルは、横領事件を「自分の人生の物語の一部」（つまり、自分が個人的に行ったことであり、自分という人間の一部）として、どの程度捉えていると思いますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="dm5" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">全く彼の物語の一部ではない</span></span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="4"><span class="likert-label">4</span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="dm5" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">彼の物語の中心的な一部である</span></span></div>
+                </div>
+            </div>
+
+            <!-- 6. Forgiveness Judgment -->
+            <div class="mb-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block text-lg font-medium text-gray-800 mb-6">
+                    6. マイケルは20年前にしたことに対して、どの程度許されるべきだと思いますか？
+                </label>
+                <div class="px-2">
+                    <input type="range" id="forgive-slider" min="0" max="10" step="1" value="5" oninput="document.getElementById('forgive-val').innerText = this.value">
+                    <div class="flex justify-between text-sm text-gray-500 mt-2 font-medium">
+                        <span>0 - 全く許されるべきではない</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">値: <span id="forgive-val">5</span></span>
+                        <span>10 - 完全に許されるべきだ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6b. Retributive Blame Isolation Item -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    7. 仮に、マイケルが罰せられるかどうかに関わらず、今後の人生で二度と犯罪を犯さないことが確実に分かっているとします。その場合でも、現在のマイケルは20年前の行いに対して非難され、罰せられるべきだと思いますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="dm6b" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">いいえ、非難や罰を受けるべきではない</span></span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="4"><span class="likert-label">4</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6b" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">はい、それに関わらず完全に罰せられるべきだ</span></span></div>
+                </div>
+            </div>
+
+            <!-- 6c. Sympathy Covariate Item -->
+            <div class="mb-10">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    8. 現在のマイケルの状況について考えてみて、彼に対してどのくらい同情を感じますか？
+                </label>
+                <div class="likert-group">
+                    <div class="likert-item"><input type="radio" name="dm6c" value="1"><span class="likert-label">1<br/><span class="text-xs text-gray-500">全く同情しない</span></span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="2"><span class="likert-label">2</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="3"><span class="likert-label">3</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="4"><span class="likert-label">4</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="5"><span class="likert-label">5</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="6"><span class="likert-label">6</span></div>
+                    <div class="likert-item"><input type="radio" name="dm6c" value="7"><span class="likert-label">7<br/><span class="text-xs text-gray-500">とても同情する</span></span></div>
+                </div>
+            </div>
+
+            <!-- 7. Free-Response Justification -->
+            <div class="mb-6">
+                <label class="block text-lg font-medium text-gray-800 mb-4">
+                    9. マイケルの非難の度合い（Q1での回答）をそのように評価した主な理由を、1〜2文程度で教えてください。あなたの言葉で考えを説明してくださいね。
+                </label>
+                <textarea rows="3" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-y" placeholder="ここに回答を入力してください..."></textarea>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(5, 4)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="nextStep(5, 6)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 6: List Experiment ================= -->
+        <div id="step-6" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第5部: 社会的態度について</h2>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-900 rounded-r-md">
+                <strong>回答のお願い:</strong> 下にいくつかの意見が並んでいます。すべて目を通した上で、あなたが個人的に賛成するものが<strong>いくつあるか</strong>を教えてください。どれに賛成しているかを教える必要はありません。賛成する意見の「合計数」だけを入力してください。たとえば、2つ賛成なら「2」、ひとつも賛成しないなら「0」と入力します。
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
+                <ul id="list-experiment-items" class="list-disc pl-6 space-y-3 text-lg text-gray-700">
+                    <li>公共の場にゴミを捨てる人は、罰金を払うべきだと思う。</li>
+                    <li>選挙権の最低年齢は16歳に引き下げるべきだと思う。</li>
+                    <li>学生は全員、制服の着用を義務付けられるべきだと思う。</li>
+                    <li>都市部の公共交通機関は、住民全員に無料化されるべきだと思う。</li>
+                    <!-- Item 5 conditionally injected via JS -->
+                </ul>
+            </div>
+
+            <div class="mb-6 flex items-center">
+                <label class="text-lg font-medium text-gray-800 mr-4">あなたが賛成する意見の合計数 (0 - <span id="max-list-count">4</span>):</label>
+                <input type="number" min="0" max="5" class="w-20 p-2 border border-gray-300 rounded-lg text-center text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0">
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(6, 5)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="nextStep(6, 7)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors focus:ring-4 focus:ring-blue-100">
+                    次へ &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 7: Within-Subject Probe (Corruption Arc) ================= -->
+        <div id="step-7" class="step bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">第6部: 別のストーリー</h2>
+            
+            <p class="mb-6 text-gray-700 leading-relaxed">
+                ここまで回答していただきありがとうございます。最後に、もうひとつ短いシナリオを読んでいただきます。これは別の状況にいる別の人のお話です。よく読んでいただき、これまでと同じように、あなたの率直な意見に基づいて質問にお答えください。
+            </p>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">サラのストーリー</h3>
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8 text-gray-800 text-lg leading-relaxed shadow-inner space-y-4">
+                <p>
+                    今から15年前、当時30歳だったサラ・マーサーは、地域の健康クリニックで看護師をしていました。クリニックにいた頃の彼女は、とても思いやりがあり、誠実で献身的だと同僚や患者から知られていました。彼女は患者を助けるためにわざわざ手間をかけ、家族の支援がない患者にはよく特別な時間を割いていました。一緒に働いていた誰もが、彼女をチームの中で最も道徳的に尊敬できる人物のひとりだと考えていました。彼女は15年前にクリニックを辞め、現在は45歳になっています。
+                </p>
+                <p>
+                    この15年間で、サラは大きく変わりました。
+                    <span id="sarah-condition-text" class="font-medium text-blue-900 bg-blue-50 px-1 rounded">
+                        <!-- Content injected via JS based on matching condition -->
+                    </span>
+                </p>
+                <p class="font-semibold pt-4 border-t border-gray-200">
+                    さて、最近になって、15年前にサラがクリニックの保険会社に不正な請求を行い、結果的に9万ドル（約1300万円）の不当な支払いを受け取っていたことが発覚したと想像してください。これにより、最終的に患者の負担費用が上がってしまっていました。当時、彼女が捕まったり起訴されたりすることはありませんでした。
+                </p>
+            </div>
+
+            <div class="mb-10 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <label class="block text-lg font-medium text-gray-800 mb-6">
+                    現在のサラは、15前年の行いに対して、どの程度非難されるべきだと思いますか？
+                </label>
+                <div class="px-2">
+                    <input type="range" id="sarah-blame-slider" min="0" max="10" step="1" value="5" oninput="document.getElementById('sarah-blame-val').innerText = this.value">
+                    <div class="flex justify-between text-sm text-gray-500 mt-2 font-medium">
+                        <span>0 - 全く非難されるべきではない</span>
+                        <span class="font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">値: <span id="sarah-blame-val">5</span></span>
+                        <span>10 - 可能な限り最大限非難されるべき</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between mt-8">
+                <button onclick="prevStep(7, 6)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2.5 px-6 rounded-lg transition-colors">
+                    &larr; 戻る
+                </button>
+                <button onclick="submitSurvey()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all hover:-translate-y-0.5 focus:ring-4 focus:ring-green-200">
+                    アンケートを送信する
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= COMPLETION SCREEN ================= -->
+        <div id="step-8" class="step bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">ありがとうございました！</h2>
+            <p class="text-lg text-gray-600 mb-8">回答は無事に記録されました。研究へのご協力とお時間をいただき、本当に感謝いたします。</p>
+            <p class="text-sm text-gray-500">このブラウザウィンドウを閉じて終了してください。</p>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 1. Condition Data Definitions ---
+        const conditions = {
+            1: {
+                title: "Condition 1: High Connectedness — Moral Character",
+                text: "今日、マイケルは価値観や道徳的性格の面で、20年前の彼とほとんど同じ人間です。彼のことを知る人たちは、彼の核となる性格は変わっていないと言います。彼は今でも他人との関わりにおいて自己中心的で打算的な傾向があります。上手くごまかせると思えば、今でも倫理的にズルをします。周りの人に対する心からの思いやりはほとんど見られません。彼の基本的な価値観や道徳的な考え方は、横領を犯した時とほぼ同じです。一方で、当時の記憶はしっかりと残っており、彼の一般的な人生の歩み（キャリアや日々のルーティン）も、当時と同じような方向で続いています。",
+                dimension: "道徳的な価値観や倫理的な考え方",
+                sarahText: "彼女は道徳的には以前とほとんど変わらず、思いやりがあり、誠実で、他人に気を配っています。彼女の基本的な価値観や道徳的な考え方は、15年前からほぼ変わっていません。"
+            },
+            2: {
+                title: "Condition 2: Moderate Connectedness — Moral Character",
+                text: "この20年間で、マイケルは価値観や道徳的性格の面でいくつかの重要な変化を遂げました。昔の彼も今の彼も知る人たちは、彼の道徳的な考え方が明らかに違っていると言います。彼は以前よりも少し共感的になり、誠実になりました。昔の自己中心的な傾向も少し残っていますが、以前は持っていなかった、他人への心からの思いやりを持つようになりました。彼の性格は、横領を犯した人物と部分的に連続しており、部分的に異なっています（いくつかの面では認識できるほど似ていますが、他の面では意味のある変化を遂げています）。当時の記憶と一般的な人生の歩みはほぼ変わっていません。",
+                dimension: "道徳的な価値観や倫理的な考え方",
+                sarahText: "彼女は以前よりも明らかに自己中心的になり、他人への関心が薄れました。状況によっては心からの優しさを示すこともできますが、彼女の全体的な道徳的性格はシフトしており、以前よりも誠実さや他者指向性が低くなっています。"
+            },
+            3: {
+                title: "Condition 3: Low Connectedness — Moral Character",
+                text: "この20年間で、マイケルは価値観や道徳的性格の面で劇的な変化を遂げました。昔の彼も今の彼も知る人たちは、彼は道徳的に見れば事実上「別人」だと言います。今の彼は深く共感的で、非常に誠実で、他人を助けることに献身的です。彼は広範囲にわたってボランティア活動を行い、リスクを抱える若者のメンターとなり、友人たちは彼を「最も道徳的に立派な人のひとり」だと表現しています。彼の基本的な価値観や道徳的な考え方は、横領を犯した人物とは似ても似つきません。当時の記憶と一般的な人生の歩みはほぼ変わっていません。",
+                dimension: "道徳的な価値観や倫理的な考え方",
+                sarahText: "彼女は現在、他人の幸福にはほとんど無関心です。今の彼女を知る人は、彼女を打算的で利己的、個人の利益のために他人を騙すことも厭わないと表現します。彼女の基本的な価値観や道徳的な考え方は、かつての思いやりがあって誠実だった人物とは似ても似つきません。"
+            },
+            4: {
+                title: "Condition 4: High Connectedness — Episodic Memories",
+                text: "今日、マイケルの当時の記憶は非常にしっかりと残っています。彼は横領のことを鮮明に覚えています。自分が下した具体的な決定、お金を奪った人々、そして自分がやっていたことをどのように隠蔽したかなどです。彼は当時の詳細な出来事や顔、瞬間をほとんど苦労せずに思い出すことができます。その数年間の記憶は、彼にとって鮮やかでいつでも引き出せるままです。対照的に、彼の道徳的性格と価値観は20年前からほとんど変わっておらず、一般的な人生の歩みも当時と同じような方向で続いています。",
+                dimension: "横領事件とそれを取り巻く出来事についての記憶",
+                sarahText: "クリニックにいた頃の彼女の記憶はしっかりと残っています。彼女は当時の患者や同僚、自分がした仕事をかなりはっきりと覚えています。"
+            },
+            5: {
+                title: "Condition 5: Moderate Connectedness — Episodic Memories",
+                text: "この20年間で、マイケルの当時の記憶は大きく変わってしまいました。神経系の疾患により、彼はその数年間の記憶の多くを失ってしまったのです。彼には、横領や関わった人々についての断片的で曖昧な記憶しかありません。何かが起きたことは覚えていますが、具体的な詳細や顔、当時自分が下した決定を思い出すことはできません。彼の記憶は不完全で、いくつか見覚えのあるような気はしますが、具体的な記憶のほとんどは失われています。対照的に、彼の道徳的性格、価値観、一般的な人生の歩みは20年前からほとんど変わっていません。",
+                dimension: "横領事件とそれを取り巻く出来事についての記憶",
+                sarahText: "彼女はクリニックで過ごした数年間の記憶の多くを失ってしまいました。彼女には当時の断片的な記憶しかありません。なんとなく見覚えがあるような気はしますが、具体的な記憶のほとんどは失われています。"
+            },
+            6: {
+                title: "Condition 6: Low Connectedness — Episodic Memories",
+                text: "この20年間で、マイケルの当時の記憶はほぼ完全に失われてしまいました。神経系の疾患により、彼は横領のことや、それが起きた数年間の記憶を事実上まったく持っていません。彼には、お金を奪った人々のこと、自分が下した決定、当時の出来事についての記憶がありません。自分がしたことの記録を見せられても、彼にはそれが自分の記憶であるという感覚はまったくありません。まるで、その期間の人生が他の誰かの歴史であるかのようです。対照的に、彼の道徳的性格、価値観、一般的な人生の歩みは20年前からほとんど変わっていません。",
+                dimension: "横領事件とそれを取り巻く出来事についての記憶",
+                sarahText: "神経系の疾患により、彼女はクリニックにいた頃の記憶——世話をした患者、一緒に働いた同僚、自分が下した決定——を事実上すべて失ってしまいました。当時の写真や記録を見せられても、彼女にはそれが自分の記憶であるという感覚はまったくありません。"
+            },
+            7: {
+                title: "Condition 7: High Connectedness — Life Goals/Projects",
+                text: "今日、マイケルの人生の方向性、キャリア、日々の状況は、20年前とほとんど同じです。彼は同じ都市で金融の仕事を続けています。彼の仕事におけるアイデンティティ、長期的な目標、交友関係、日常生活は、横領当時の生活とよく似ています。当時の彼の人生を定義していたプロジェクトや追求しているものは、今でも彼の人生を定義しています。対照的に、彼の道徳的性格、価値観、当時の記憶は20年前からほとんど変わっていません。",
+                dimension: "人生の目標、キャリア、日常の活動",
+                sarahText: "彼女の人生の方向性はほとんど同じです。彼女は同じ地域で医療の仕事を続けており、日々の生活、交友関係、仕事上の目標は、15年前の彼女が持っていたものとよく似ています。"
+            },
+            8: {
+                title: "Condition 8: Moderate Connectedness — Life Goals/Projects",
+                text: "この20年間で、マイケルの人生の方向性はいくつかの重要な面で変化しました。彼は以前の金融のキャリアを離れ、別の分野で再訓練を受けました。彼は新しい都市に引っ越し、仕事におけるアイデンティティは明らかに異なっています。昔の交友関係のいくつかは残っていますが、彼の日々の生活、長期的な目標、そして時間を費やすプロジェクトは、かつてのものとは部分的に異なっています。彼の人生の歩みは、いくつかの点で過去と連続していることが分かりますが、他の点では意味のあるシフトを遂げています。対照的に、彼の道徳的性格、価値観、当時の記憶は20年前からほとんど変わっていません。",
+                dimension: "人生の目標、キャリア、日常の活動",
+                sarahText: "彼女の人生の方向性は大きくシフトしました。彼女は医療の現場を離れて新しい都市に引っ越し、仕事におけるアイデンティティや日々の生活はかつてのものとはかなり異なっています——ただし、いくつかの連続した繋がりは残っています。"
+            },
+            9: {
+                title: "Condition 9: Low Connectedness — Life Goals/Projects",
+                text: "この20年間で、マイケルの人生の方向性は完全に変わりました。彼は金融のキャリアを完全に捨て、別の都市に引っ越し、高校の理科の教師として再訓練を受けました。彼の日々の生活、交友関係、長期的なプロジェクト、仕事におけるアイデンティティは、かつての生活とは似ても似つきません。今の彼を定義する目標や追求しているものは、20年前の彼を知る人にとっては見覚えのないものでしょう。対照的に、彼の道徳的性格、価値観、当時の記憶は20年前からほとんど変わっていません。",
+                dimension: "人生の目標、キャリア、日常の活動",
+                sarahText: "彼女は人生の方向性を完全に変えました。医療や人を助けることに関連する仕事を完全に捨て、別の国に移住し、現在は以前のアイデンティティとはまったく無関係の目標を追求しています。彼女の日々の生活、交友関係、長期的なプロジェクトは、かつての彼女とは似ても似つきません。"
+            },
+            10: {
+                title: "Condition 10: No-Change Control",
+                text: "今日、マイケルは20年前の彼とほとんど同じ人間です。彼の性格、価値観、当時の記憶、そして生活状況はほとんど同じです。彼は今でも同じ都市で金融の仕事をしており、同じ交友関係の多くを維持し、当時の彼がしたであろうのと同じような方法で自分の人生観を語ります。20年前の彼を知る人は、彼が本質的に変わっていないと感じるでしょう。",
+                dimension: "全体的な性格、価値観、記憶、生活状況",
+                sarahText: "彼女は以前とほとんど変わらない人間のままです。彼女の性格、価値観、クリニックにいた頃の記憶、そして生活状況はほとんど変わっていません。"
+            }
+        };
+
+        // --- 2. Initialization Logic ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // Randomly assign condition (1-10)
+            const assignedConditionId = Math.floor(Math.random() * 10) + 1;
+            const assignedCondition = conditions[assignedConditionId];
+
+            // Inject Michael's Condition Text
+            document.getElementById('condition-container').innerHTML = `<p>${assignedCondition.text}</p>`;
+            
+            // Inject dynamic dimension text for Check 2
+            document.getElementById('dynamic-dimension-text').innerText = assignedCondition.dimension;
+
+            // Inject Sarah's matching arc text
+            document.getElementById('sarah-condition-text').innerText = assignedCondition.sarahText;
+
+            // Randomly assign List Experiment version (4 vs 5 items)
+            const showSensitiveItem = Math.random() < 0.5;
+            if (showSensitiveItem) {
+                const ul = document.getElementById('list-experiment-items');
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>現在のマイケルは、20年前に犯した横領について罰せられるのが当然だと思う。</strong>`;
+                ul.appendChild(li);
+                document.getElementById('max-list-count').innerText = "5";
+                document.querySelector('input[type="number"]').max = "5";
+            }
+        });
+
+        // --- 3. UI Interaction Logic ---
+        const totalSteps = 7;
+
+        function nextStep(current, next) {
+            document.getElementById(`step-${current}`).classList.remove('active');
+            document.getElementById(`step-${next}`).classList.add('active');
+            updateProgress(next);
+            window.scrollTo(0, 0);
+        }
+
+        function prevStep(current, prev) {
+            document.getElementById(`step-${current}`).classList.remove('active');
+            document.getElementById(`step-${prev}`).classList.add('active');
+            updateProgress(prev);
+            window.scrollTo(0, 0);
+        }
+
+        function updateProgress(stepNumber) {
+            if(stepNumber > totalSteps) return; // For completion screen
+            const percentage = (stepNumber / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `ステップ ${stepNumber} / ${totalSteps}`;
+        }
+
+        function submitSurvey() {
+            // In a real application, form data would be collected and sent to a server here.
+            document.getElementById('step-7').classList.remove('active');
+            document.getElementById('step-8').classList.add('active');
+            
+            // Hide progress bar on completion
+            document.querySelector('header').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        // Specific helper for the monetary slider to format numbers
+        function updateMoneyText(val) {
+            document.getElementById('money-pct').innerText = val;
+            const dollarAmount = (val / 100) * 140000;
+            document.getElementById('money-dollar').innerText = dollarAmount.toLocaleString() + "ドル";
+        }
+    </script>
+</body>
+</html>
