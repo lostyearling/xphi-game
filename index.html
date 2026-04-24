@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>実験哲学ゲームプラットフォーム</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans JP (モダンな日本語) & Share Tech Mono (システム英数字) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-purple: #8b5cf6;
+            --neon-emerald: #10b981;
+            --bg-dark: #07090f;
+            --panel-bg: rgba(15, 23, 42, 0.7);
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-dark);
+            /* 近未来的なグリッド背景 */
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* 常に背景でゆっくり動く光のオーブ */
+        .ambient-light {
+            position: absolute;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(0,240,255,0.1) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .ambient-light.purple {
+            background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, rgba(0,0,0,0) 70%);
+            right: -10vw;
+            bottom: -10vw;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* メインパネル (グラスモーフィズム) */
+        .tech-panel {
+            background-color: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 240, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 上部のヘッダー領域 */
+        .panel-header {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.1) 0%, transparent 100%);
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            position: relative;
+        }
+
+        .panel-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 30%;
+            height: 2px;
+            background-color: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .platform-title {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .subtitle-font {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-cyan);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* コンテンツ領域 */
+        .controls-area {
+            padding: 40px 30px;
+            min-height: 350px;
+            position: relative;
+        }
+
+        /* テック風ボタンの共通スタイル */
+        .btn-tech {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            font-size: 1.2rem;
+            text-decoration: none;
+            padding: 18px 24px;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* 左側のアクセントライン */
+        .btn-tech::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-tech:hover {
+            color: #ffffff;
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateX(5px);
+        }
+
+        .btn-tech:active {
+            transform: translateX(2px) scale(0.99);
+        }
+
+        /* 戻るボタン専用スタイル */
+        .btn-back {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            font-size: 1rem;
+            padding: 10px 24px;
+            display: inline-flex;
+            width: auto;
+            margin-top: 20px;
+        }
+        .btn-back:hover {
+            border-color: #cbd5e1;
+            color: #ffffff;
+            transform: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* SPAビューの切り替えアニメーション */
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 24px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-header::before {
+            content: '■';
+            font-size: 0.8em;
+            color: var(--neon-cyan);
+        }
+
+        /* ダッシュボードのパネル */
+        .dashboard-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 背景のアンビエントライト -->
+    <div class="ambient-light"></div>
+    <div class="ambient-light purple"></div>
+
+    <main class="tech-panel">
+        <!-- ヘッダー領域 (常に表示) -->
+        <div class="panel-header">
+            <h1 class="platform-title">EXPERIMENTAL PHILOSOPHY</h1>
+            <h2 class="text-sm text-gray-400 mb-2">実験哲学プラットフォーム</h2>
+            <p id="screen-subtitle" class="subtitle-font">
+                > SYSTEM_STATUS: ONLINE_
+            </p>
+        </div>
+
+        <!-- インタラクティブ領域 -->
+        <div class="controls-area">
+            
+            <!-- ビュー1: ホーム画面 (役割選択) -->
+            <div id="view-home" class="view-section active">
+                <h2 class="section-header">ユーザーモジュールを選択</h2>
+                
+                <button onclick="switchView('view-player')" class="btn-tech group">
+                    <span class="mr-4 text-cyan-400 group-hover:text-cyan-300 font-mono">01</span>
+                    プレイヤーとして接続
+                    <div class="absolute left-0 top-0 w-1 h-full bg-cyan-500 shadow-[0_0_10px_#00f0ff] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+                
+                <button onclick="switchView('view-publisher')" class="btn-tech group">
+                    <span class="mr-4 text-purple-400 group-hover:text-purple-300 font-mono">02</span>
+                    パブリッシャーとして接続
+                    <div class="absolute left-0 top-0 w-1 h-full bg-purple-500 shadow-[0_0_10px_#8b5cf6] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+            </div>
+
+            <!-- ビュー2: プレイヤー ディレクトリ -->
+            <div id="view-player" class="view-section">
+                <h2 class="section-header">利用可能なシミュレーション</h2>
+                
+                <!-- JSフレームワークがここにゲームリストを自動生成します -->
+                <nav id="game-list-container"></nav>
+
+                <div class="mt-8 text-left border-t border-slate-700 pt-4">
+                    <button onclick="switchView('view-home')" class="btn-tech btn-back">
+                        <span class="font-mono mr-2">&lt;</span> 戻る
+                    </button>
+                </div>
+            </div>
+
+            <!-- ビュー3: パブリッシャー ダッシュボード -->
+            <div id="view-publisher" class="view-section">
+                <h2 class="section-header">パブリッシャーコンソール</h2>
+                
+                <div class="dashboard-panel">
+                    <p class="text-white mb-2 font-bold">認証成功：権限レベル[PUBLISHER]</p>
+                    <p class="text-sm text-slate-400 leading-relaxed font-mono">
+                        > プラットフォーム基盤は正常に稼働しています。<br>
+                        > 開発者向けモジュール（データ解析、新規シミュレーションのデプロイメントツール等）は、今後のアップデートでこの領域に統合されます。<br>
+                        > 現在、スタンバイ状態です...
+                    </p>
+                </div>
+
+                <div class="mt-8 text-left">
+                    <button onclick="switchView('view-home')" class="btn-tech btn-back">
+                        <span class="font-mono mr-2">&lt;</span> 接続を解除
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        /**
+         * ==========================================
+         * ⚙️ FRAMEWORK DATA CONFIGURATION
+         * ==========================================
+         * ゲームリストの設定。色指定はネオンカラーを意識したHEXコードを使用。
+         */
+        const gamesList = [
+            {
+                title: "運転手 (Untenshu)",
+                url: "untenshu.html",
+                accentColor: "#10b981" // エメラルドグリーン
+            },
+            {
+                title: "シミュレーション 02",
+                url: "game2.html",
+                accentColor: "#f59e0b" // アンバー（オレンジ）
+            },
+            {
+                title: "シミュレーション 03",
+                url: "game3.html",
+                accentColor: "#0ea5e9" // スカイブルー
+            }
+        ];
+
+        // ------------------------------------------
+        // エンジン: ゲームディレクトリの描画
+        // ------------------------------------------
+        function renderGameDirectory() {
+            const container = document.getElementById('game-list-container');
+            container.innerHTML = ''; 
+
+            gamesList.forEach((game, index) => {
+                // リンク要素の作成
+                const link = document.createElement('a');
+                link.href = game.url;
+                link.className = 'btn-tech group'; // Tailwindのgroupクラスを付与
+                
+                // ナンバリングとタイトルのHTML構造
+                const indexFormatted = String(index + 1).padStart(2, '0');
+                link.innerHTML = `
+                    <span class="mr-4 font-mono transition-colors" style="color: ${game.accentColor}">${indexFormatted}</span>
+                    ${game.title}
+                    <div class="absolute left-0 top-0 w-1 h-full opacity-0 transition-opacity" style="background-color: ${game.accentColor}; box-shadow: 0 0 10px ${game.accentColor};"></div>
+                `;
+
+                // ホバー時のイベント（アクセントカラーを光らせる）
+                link.addEventListener('mouseover', () => {
+                    link.style.borderColor = `rgba(${hexToRgb(game.accentColor)}, 0.4)`;
+                    link.style.boxShadow = `0 0 15px rgba(${hexToRgb(game.accentColor)}, 0.15)`;
+                    const line = link.querySelector('div');
+                    if(line) line.style.opacity = '1';
+                });
+
+                link.addEventListener('mouseout', () => {
+                    link.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    link.style.boxShadow = 'none';
+                    const line = link.querySelector('div');
+                    if(line) line.style.opacity = '0';
+                });
+
+                container.appendChild(link);
+            });
+        }
+
+        // HEXカラーをRGBに変換する補助関数（影の計算用）
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? 
+                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+                '0, 240, 255';
+        }
+
+        // ------------------------------------------
+        // エンジン: ビューコントローラー (SPA ルーティング)
+        // ------------------------------------------
+        function switchView(targetViewId) {
+            // 現在のビューをフェードアウト
+            const activeView = document.querySelector('.view-section.active');
+            if(activeView) {
+                activeView.style.opacity = '0';
+                activeView.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    activeView.classList.remove('active');
+                    showNewView(targetViewId);
+                }, 300); // フェードアウトの時間
+            } else {
+                showNewView(targetViewId);
+            }
+        }
+
+        function showNewView(targetViewId) {
+            const targetView = document.getElementById(targetViewId);
+            targetView.classList.add('active');
+            
+            // アニメーションのリセットと実行
+            setTimeout(() => {
+                targetView.style.opacity = '1';
+                targetView.style.transform = 'translateY(0)';
+            }, 10);
+
+            // サブタイトル（ステータス）の更新
+            const subtitle = document.getElementById('screen-subtitle');
+            
+            // タイプライター風エフェクト
+            let targetText = "";
+            if (targetViewId === 'view-player') {
+                targetText = "> MODULE: PLAYER_ACCESS_GRANTED_";
+            } else if (targetViewId === 'view-publisher') {
+                targetText = "> MODULE: PUBLISHER_AUTH_VERIFIED_";
+            } else {
+                targetText = "> SYSTEM_STATUS: ONLINE_";
+            }
+            
+            typeWriterEffect(subtitle, targetText);
+        }
+
+        // タイプライターエフェクト関数
+        function typeWriterEffect(element, text) {
+            element.textContent = "";
+            let i = 0;
+            clearInterval(element.typingInterval);
+            element.typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(element.typingInterval);
+                }
+            }, 30); // タイピング速度
+        }
+
+        // ロード時にフレームワークを初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGameDirectory();
+            // 初期ビューの表示設定を確実に行う
+            const home = document.getElementById('view-home');
+            home.style.opacity = '1';
+            home.style.transform = 'translateY(0)';
+        });
+    </script>
+</body>
+</html>
